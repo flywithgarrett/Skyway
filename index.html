@@ -91,8 +91,8 @@ let sf=null,sa=AP[0],ct="globe",am=[];
 const cv=document.getElementById("globe-canvas"),sc=new THREE.Scene(),ca=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,2000);ca.position.z=12;
 const re=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});re.setPixelRatio(Math.min(devicePixelRatio,2));re.setClearColor(0,0);
 const G=5,gg=new THREE.Group();sc.add(gg);
-sc.add(new THREE.AmbientLight(0x223322,.6));const sn=new THREE.DirectionalLight(0x99ffcc,1.6);sn.position.set(10,6,10);sc.add(sn);sc.add(new THREE.PointLight(0x00e87b,.2,30));
-gg.add(new THREE.Mesh(new THREE.SphereGeometry(G,96,96),new THREE.MeshPhongMaterial({color:0x020805,emissive:0x010402,specular:0x0a3a1a,shininess:50})));
+sc.add(new THREE.AmbientLight(0x334455,1.0));const sn=new THREE.DirectionalLight(0xaaddff,2.0);sn.position.set(10,6,10);sc.add(sn);sc.add(new THREE.PointLight(0x00e87b,.4,30));
+gg.add(new THREE.Mesh(new THREE.SphereGeometry(G,96,96),new THREE.MeshPhongMaterial({color:0x0a2a4a,emissive:0x051525,specular:0x1a6080,shininess:70})));
 const vs=`varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 [[G*1.015,3.2,.5],[G*1.06,4.5,.15],[G*1.12,6.,.08]].forEach(([r,pw,op])=>{gg.add(new THREE.Mesh(new THREE.SphereGeometry(r,48,48),new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:`varying vec3 vN;void main(){float i=pow(0.65-dot(vN,vec3(0,0,1)),${pw.toFixed(1)});gl_FragColor=vec4(0.,0.91,0.48,1.)*i*${op.toFixed(2)};}`,blending:THREE.AdditiveBlending,side:THREE.BackSide,transparent:true})));});
 function lv(la,ln,r){r=r||G;const p=(90-la)*Math.PI/180,t=(ln+180)*Math.PI/180;return new THREE.Vector3(-r*Math.sin(p)*Math.cos(t),r*Math.cos(p),r*Math.sin(p)*Math.sin(t));}
