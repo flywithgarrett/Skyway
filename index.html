@@ -181,16 +181,39 @@ function selF(f){sf=f;render();showRt();map.closePopup();
   </div>`).openOn(map);}
 
 window.showDetail=function(id){const f=fl.find(x=>x.id===id);if(!f)return;map.closePopup();sf=f;render();showRt();
-  // Zoom to show full route
   const bounds=L.latLngBounds([[f.o.la,f.o.ln],[f.d.la,f.d.ln],[f.la,f.ln]]);
   map.fitBounds(bounds,{padding:[60,60],maxZoom:8,duration:.6});
   const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500';
+  // Determine ATC sector based on flight status
+  const nearAP=f.pg<20?f.o:f.pg>80?f.d:null;
+  const sector=f.st==='Departing'?{type:'Ground/Tower',freq:'121.90',name:f.o.c+' Ground'}:f.st==='Climbing'?{type:'Departure',freq:'124.35',name:f.o.c+' Departure'}:f.st==='En Route'?{type:'Center',freq:`${124+~~(f.la%10)}.${(~~(Math.abs(f.ln)%40)*25).toString().padStart(3,'0')}`,name:f.la>45?'New York Center':f.la>35?'Washington Center':f.la>25?'Atlanta Center':'Houston Center'}:f.st==='Descending'?{type:'Approach',freq:'119.10',name:f.d.c+' Approach'}:f.st==='On Approach'?{type:'Tower',freq:'118.70',name:f.d.c+' Tower'}:{type:'Center',freq:'132.45',name:'Sector Center'};
+  const destFd=apMap[f.d.c]?.fd||apMap[f.o.c]?.fd||'kjfk_gnd_twr';
+  const destIcao=(f.pg>50?f.d.c:f.o.c).toLowerCase();
   const D=(l,v,c)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="color:var(--t2);font-size:12px">${l}</span><span class="mono" style="color:${c||'#fff'};font-size:13px;font-weight:500">${v}</span></div>`;
   document.getElementById('pt').innerHTML=`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${f.al.cl}"></div><span>${f.id}</span><span style="font-weight:400;font-size:12px;color:var(--t2)">${f.al.n}</span></div>`;
   document.getElementById('pb').innerHTML=`<div style="padding:16px"><div style="display:flex;justify-content:center;gap:24px;padding:20px;background:rgba(0,0,0,.2);border-radius:16px;margin-bottom:16px"><div style="text-align:center"><div class="mono" style="font-size:28px;font-weight:700">${f.o.c}</div><div style="font-size:11px;color:var(--t2)">${f.o.ci}</div></div><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="color:var(--a);font-size:14px">✈</div><div style="width:60px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:${f.pg}%;height:100%;background:var(--a)"></div></div><div class="mono" style="font-size:10px;color:var(--t3)">${f.pg}%</div></div><div style="text-align:center"><div class="mono" style="font-size:28px;font-weight:700">${f.d.c}</div><div style="font-size:11px;color:var(--t2)">${f.d.ci}</div></div></div>
     ${em?`<div style="padding:10px 14px;background:rgba(255,64,88,.08);border:1px solid rgba(255,64,88,.12);border-radius:12px;margin-bottom:14px;color:var(--em);font-size:13px;font-weight:600">⚠️ EMERGENCY — SQUAWK ${f.sq}</div>`:''}
-    <div class="tag" style="background:${f.st==='En Route'?'rgba(45,212,160,.1)':'rgba(237,166,48,.1)'};color:${f.st==='En Route'?'var(--g)':'var(--a)'};margin-bottom:14px">${f.st}</div>
-    ${D('Aircraft',f.ac.c+' — '+f.ac.n)}${D('Registration',f.rg)}${D('Altitude','FL'+~~(f.alt/100)+' ('+f.alt.toLocaleString()+' ft)',f.alt>30000?'var(--g)':'var(--a)')}${D('Speed',f.spd+' kts ('+~~(f.spd*1.852)+' km/h)')}${D('Heading',f.hd+'°')}${D('V/S',(f.vr>0?'+':'')+f.vr+' fpm',f.vr>500?'var(--g)':f.vr<-500?'var(--em)':'var(--t)')}${D('Squawk',f.sq,em?'var(--em)':null)}${D('Position',f.la.toFixed(3)+'°, '+f.ln.toFixed(3)+'°')}</div>`;
+    <div class="tag" style="background:rgba(59,184,232,.1);color:var(--a);margin-bottom:14px">${f.st}</div>
+    <!-- ATC SECTOR INFO -->
+    <div style="background:rgba(59,184,232,.06);border:1px solid rgba(59,184,232,.12);border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--a);margin-bottom:10px;letter-spacing:.5px">📡 CURRENT ATC CONTACT</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><div style="font-size:14px;font-weight:600;color:#fff">${sector.name}</div><div style="font-size:11px;color:var(--t2)">${sector.type}</div></div>
+        <div class="mono" style="font-size:18px;font-weight:700;color:var(--a)">${sector.freq}</div>
+      </div>
+      <button onclick="listenATC('${destFd}','${destIcao}')" style="width:100%;padding:10px;background:rgba(59,184,232,.1);border:1px solid rgba(59,184,232,.15);border-radius:10px;color:var(--a);font-family:Inter;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">🎧 Listen to ${f.pg>50?f.d.c:f.o.c} ATC</button>
+    </div>
+    <!-- Nearby frequencies -->
+    <div style="background:rgba(0,0,0,.15);border-radius:12px;padding:12px;margin-bottom:14px">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:8px;letter-spacing:.5px">NEARBY FREQUENCIES</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="padding:8px;background:rgba(0,0,0,.2);border-radius:8px;cursor:pointer" onclick="listenATC('${apMap[f.d.c]?.fd||'kjfk_gnd_twr'}','${f.d.c.toLowerCase()}')"><div style="font-size:9px;color:var(--t3)">Tower</div><div class="mono" style="font-size:12px;color:var(--a)">${f.d.c} TWR</div></div>
+        <div style="padding:8px;background:rgba(0,0,0,.2);border-radius:8px;cursor:pointer" onclick="listenATC('${apMap[f.o.c]?.fd||'kjfk_gnd_twr'}','${f.o.c.toLowerCase()}')"><div style="font-size:9px;color:var(--t3)">Tower</div><div class="mono" style="font-size:12px;color:var(--a)">${f.o.c} TWR</div></div>
+        <div style="padding:8px;background:rgba(0,0,0,.2);border-radius:8px"><div style="font-size:9px;color:var(--t3)">Approach</div><div class="mono" style="font-size:12px;color:#fff">119.10</div></div>
+        <div style="padding:8px;background:rgba(0,0,0,.2);border-radius:8px"><div style="font-size:9px;color:var(--t3)">Center</div><div class="mono" style="font-size:12px;color:#fff">${sector.freq}</div></div>
+      </div>
+    </div>
+    ${D('Aircraft',f.ac.c+' — '+f.ac.n)}${D('Registration',f.rg)}${D('Altitude','FL'+~~(f.alt/100)+' ('+f.alt.toLocaleString()+' ft)',f.alt>30000?'var(--a)':'#fff')}${D('Speed',f.spd+' kts ('+~~(f.spd*1.852)+' km/h)')}${D('Heading',f.hd+'°')}${D('V/S',(f.vr>0?'+':'')+f.vr+' fpm',f.vr>500?'var(--a)':f.vr<-500?'var(--em)':'var(--t)')}${D('Squawk',f.sq,em?'var(--em)':null)}${D('Position',f.la.toFixed(3)+'°, '+f.ln.toFixed(3)+'°')}</div>`;
   document.getElementById('panel').classList.add('open');};
 
 function showAP(a){sa=a;const arr=fl.filter(f=>f.d.c===a.c).slice(0,20),dep=fl.filter(f=>f.o.c===a.c).slice(0,20);
@@ -205,7 +228,22 @@ function sw(t){document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('o
   const pt=document.getElementById('pt'),pb=document.getElementById('pb');
   if(t==='flights'){pt.innerHTML=`Flights <span style="font-weight:400;color:var(--t2);font-size:12px">${fl.length} tracked</span>`;pb.innerHTML=fl.slice(0,60).map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:13px;font-weight:500">${f.id}</span><span class="mono" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2)">${f.o.c} → ${f.d.c} · ${f.al.n} · ${f.ac.c} · ${f.spd}kts</div></div></div>`).join('');}
   else if(t==='airports'){pt.textContent='Airports';pb.innerHTML=AP.filter(a=>HUBS[Object.keys(HUBS).find(k=>HUBS[k].hub===a.c)]||a.co!=='US'||['KJFK','KLAX','KORD','KATL','KCLT','KDFW','KDEN','KSFO','KMIA','KBOS','KSEA'].includes(a.c)).map(a=>`<div class="fc" onclick="showAP(AP.find(x=>x.c==='${a.c}'))"><div style="width:10px;height:10px;border-radius:50%;background:var(--bl)"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:14px;font-weight:500">${a.c}</span><span style="font-size:11px;color:var(--t3)">${a.co}</span></div><div style="font-size:12px;color:var(--t2)">${a.n} — ${a.ci}</div></div></div>`).join('');}
-  else if(t==='atc'){const TC={tower:'#ff4058',approach:'#4494f8',ground:'#eda630',center:'#a78bfa',departure:'#ec4899'};pt.innerHTML=`ATC <span class="mono" style="color:var(--a);font-size:12px">${sa.c}</span>`;pb.innerHTML=`<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><select onchange="sa=AP.find(a=>a.c===this.value);sw('atc')" style="width:100%;padding:10px;background:var(--bg);color:#fff;border:1px solid var(--bd);border-radius:10px;font-family:Inter;font-size:13px;outline:none">${AP.filter(a=>a.fd).slice(0,30).map(a=>`<option value="${a.c}" ${sa.c===a.c?'selected':''}>${a.c} — ${a.n}</option>`).join('')}</select></div><div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><a href="https://www.liveatc.net/listen.php?mount=${sa.fd}&icao=${sa.c.toLowerCase()}" target="_blank" class="btn" style="background:rgba(45,212,160,.1);color:var(--g);border:1px solid rgba(45,212,160,.12)">▶ Listen Live — ${sa.c}</a></div><div id="af" style="padding:8px 12px">${am.slice(-25).map(m=>`<div class="am" style="border-color:${TC[m.ty]||'#4a5e78'}"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:${(TC[m.ty]||'#4a5e78')}15;color:${TC[m.ty]||'#4a5e78'};font-size:9px">${m.ty}</span><span class="mono" style="color:var(--a);font-weight:500;font-size:11px">${m.cs}</span></div><span class="mono" style="color:var(--t3);font-size:9px">${m.t}Z</span></div><div class="mono" style="color:var(--t2);font-size:10px;line-height:1.5">${m.msg}</div></div>`).join('')}</div>`;}
+  else if(t==='atc'){const TC={tower:'#ff4058',approach:'#4494f8',ground:'#3bb8e8',center:'#a78bfa',departure:'#ec4899'};pt.innerHTML=`ATC <span class="mono" style="color:var(--a);font-size:12px">${sa.c}</span>`;pb.innerHTML=`<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><select onchange="sa=AP.find(a=>a.c===this.value);sw('atc')" style="width:100%;padding:10px;background:var(--bg);color:#fff;border:1px solid var(--bd);border-radius:10px;font-family:Inter;font-size:13px;outline:none">${AP.filter(a=>a.fd).slice(0,30).map(a=>`<option value="${a.c}" ${sa.c===a.c?'selected':''}>${a.c} — ${a.n}</option>`).join('')}</select></div>
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <div style="font-size:12px;font-weight:600;color:var(--a);margin-bottom:10px">🎧 Live ATC Audio — ${sa.c}</div>
+      <div id="atc-player" style="background:rgba(0,0,0,.2);border-radius:12px;overflow:hidden;border:1px solid rgba(59,184,232,.1)">
+        <iframe src="https://www.liveatc.net/hlisten.php?mount=${sa.fd}&icao=${sa.c.toLowerCase()}" style="width:100%;height:180px;border:none;background:#0a1628" allow="autoplay" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      </div>
+      <div style="font-size:9px;color:var(--t3);margin-top:6px;text-align:center">Audio provided by LiveATC.net · May require interaction to start</div>
+    </div>
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:8px">Available Feeds</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div class="fc" onclick="listenATC('${sa.fd}','${sa.c.toLowerCase()}')" style="border-radius:10px;background:rgba(59,184,232,.06)"><div style="width:6px;height:6px;border-radius:50%;background:var(--a)"></div><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--a)">Tower / Ground</div><div style="font-size:10px;color:var(--t3)">${sa.c} Primary</div></div><span style="font-size:10px;color:var(--a)">▶</span></div>
+      </div>
+    </div>
+    <div style="padding:4px 16px 4px"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px">ATC Transcript</div></div>
+    <div id="af" style="padding:4px 12px">${am.slice(-25).map(m=>`<div class="am" style="border-color:${TC[m.ty]||'#4a5e78'}"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:${(TC[m.ty]||'#4a5e78')}15;color:${TC[m.ty]||'#4a5e78'};font-size:9px">${m.ty}</span><span class="mono" style="color:var(--a);font-weight:500;font-size:11px">${m.cs}</span></div><span class="mono" style="color:var(--t3);font-size:9px">${m.t}Z</span></div><div class="mono" style="color:var(--t2);font-size:10px;line-height:1.5">${m.msg}</div></div>`).join('')}</div>`;}
   else if(t==='alerts'){const em=fl.filter(f=>f.sq==='7700'||f.sq==='7600'||f.sq==='7500');pt.innerHTML=`<span style="color:var(--em)">⚠ Alerts</span> <span style="font-weight:400;font-size:12px;color:var(--t2)">${em.length} active</span>`;pb.innerHTML=em.length?em.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))" style="border-left:3px solid var(--em)"><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-size:15px;font-weight:600;color:var(--em)">${f.id}</span><span class="tag" style="background:rgba(255,64,88,.1);color:var(--em)">SQUAWK ${f.sq}</span></div><div style="font-size:12px;color:var(--t2);margin-top:4px">${f.al.n} · ${f.ac.n}</div><div style="font-size:11px;color:var(--t3);margin-top:2px">${f.o.c} → ${f.d.c} · FL${~~(f.alt/100)} · ${f.spd}kts</div></div></div>`).join(''):`<div style="padding:60px 20px;text-align:center"><div style="font-size:44px;margin-bottom:12px">✈️</div><div style="color:var(--t);font-size:15px;font-weight:600">All Clear</div><div style="color:var(--t3);font-size:12px;margin-top:4px">No active emergency aircraft</div></div>`;}
   document.getElementById('panel').classList.add('open');}
 function cp(){document.getElementById('panel').classList.remove('open');map.closePopup();if(sf){sf=null;render();if(rtLine){map.removeLayer(rtLine);rtLine=null;}}}
@@ -224,6 +262,21 @@ setInterval(()=>{const n=new Date();document.getElementById('clock').textContent
 setInterval(()=>{fl.forEach(f=>{f.la=Math.max(-72,Math.min(72,f.la+(Math.random()-.48)*.018));f.ln=((f.ln+(Math.random()-.48)*.025+180)%360)-180;f.alt=Math.max(5000,Math.min(42000,f.alt+~~((Math.random()-.5)*50)));f.spd=Math.max(200,Math.min(580,f.spd+~~((Math.random()-.5)*3)));f.hd=(f.hd+~~((Math.random()-.5)*2)+360)%360;});render();},5000);
 let py=0;document.getElementById('panel').addEventListener('touchstart',e=>{py=e.touches[0].clientY},{passive:true});
 document.getElementById('panel').addEventListener('touchmove',e=>{if(e.touches[0].clientY-py>50)cp()},{passive:true});
+
+// Listen to ATC in-app via iframe
+window.listenATC=function(mount,icao){
+  const existing=document.getElementById('atc-player');
+  if(existing){
+    existing.innerHTML=`<iframe src="https://www.liveatc.net/hlisten.php?mount=${mount}&icao=${icao}" style="width:100%;height:180px;border:none;background:#0a1628" allow="autoplay" sandbox="allow-scripts allow-same-origin allow-popups"></iframe><div style="padding:8px;text-align:center;font-size:10px;color:var(--t3)">Loading ${icao.toUpperCase()} audio...</div>`;
+  } else {
+    sw('atc');
+    setTimeout(()=>{
+      const p=document.getElementById('atc-player');
+      if(p)p.innerHTML=`<iframe src="https://www.liveatc.net/hlisten.php?mount=${mount}&icao=${icao}" style="width:100%;height:180px;border:none;background:#0a1628" allow="autoplay" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
+    },200);
+  }
+};
+
 render();
 </script>
 </body>
