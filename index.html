@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0b1221">
+<meta name="theme-color" content="#0a1628">
 <title>SkyWay — Live Flight Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 
 <style>
-:root{--bg:#0c1322;--s1:#121c30;--bd:#243352;--a:#eda630;--em:#ff4058;--g:#2dd4a0;--bl:#4494f8;--t:#eaf0f8;--t2:#8094b0;--t3:#4a5e78}
+:root{--bg:#0a1628;--s1:#0f1f3a;--bd:#1a3058;--a:#3bb8e8;--em:#ff4058;--g:#3bb8e8;--bl:#5cc8f0;--t:#e8f4ff;--t2:#7ea8cc;--t3:#3a6088}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--t);font-family:'Inter',system-ui,sans-serif}
 .mono{font-family:'JetBrains Mono',monospace}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
 #map{position:fixed;inset:0;z-index:0}
-.leaflet-container{background:#080e1a!important}
+.leaflet-container{background:#060e1e!important}
 .leaflet-control-zoom,.leaflet-control-attribution{display:none!important}
 .leaflet-popup-content-wrapper{background:rgba(18,28,48,.94)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1)!important;border-radius:16px!important;box-shadow:0 12px 40px rgba(0,0,0,.6)!important;color:#fff!important;padding:0!important}
 .leaflet-popup-content{margin:0!important;min-width:240px}
@@ -25,7 +25,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .leaflet-tooltip{background:rgba(18,28,48,.9)!important;color:var(--bl)!important;border:1px solid rgba(68,148,248,.3)!important;border-radius:8px!important;font-family:'JetBrains Mono'!important;font-size:11px!important;padding:3px 8px!important}
 .leaflet-tooltip-top:before{border-top-color:rgba(68,148,248,.3)!important}
 
-#top{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(180deg,rgba(12,19,34,.95) 0%,transparent 100%);pointer-events:none}
+#top{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(180deg,rgba(10,22,40,.95) 0%,transparent 100%);pointer-events:none}
 #top>*{pointer-events:auto}
 #nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;display:flex;padding:4px 8px calc(env(safe-area-inset-bottom,8px) + 4px);background:rgba(12,19,34,.9);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.06)}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--t3);cursor:pointer;padding:8px 0;font-family:Inter;font-size:10px;font-weight:500;transition:color .2s}.nb.on{color:var(--a)}.nb svg{width:22px;height:22px}
@@ -43,9 +43,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <body>
 <div id="map"></div>
 <div id="top">
-  <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:var(--a);box-shadow:0 0 8px rgba(237,166,48,.4)"></div><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px">SkyWay</span></div>
+  <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#3bb8e8;box-shadow:0 0 10px rgba(59,184,232,.5)"></div><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px">SkyWay</span></div>
   <div onclick="openSearch()" style="flex:1;max-width:300px;display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer" class="glass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="font-size:13px;color:var(--t3)">Search flights, airports…</span></div>
-  <div class="glass mono" style="display:flex;align-items:center;gap:6px;padding:7px 14px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 6px rgba(45,212,160,.4)"></div><span style="font-size:11px;color:var(--g);font-weight:500">LIVE</span><span id="clock" style="font-size:11px;color:var(--t2)"></span></div>
+  <div class="glass mono" style="display:flex;align-items:center;gap:6px;padding:7px 14px"><div style="width:6px;height:6px;border-radius:50%;background:#3bb8e8;box-shadow:0 0 6px rgba(59,184,232,.5)"></div><span style="font-size:11px;color:#3bb8e8;font-weight:500">LIVE</span><span id="clock" style="font-size:11px;color:var(--t2)"></span></div>
 </div>
 <div id="search"><div style="padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)"><button onclick="closeSearch()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px">✕</button><input id="si" type="text" placeholder="Search flights, airports, airlines…" autofocus style="flex:1;background:rgba(24,36,64,1);border:1px solid var(--bd);border-radius:12px;padding:12px 16px;outline:none;color:#fff;font-family:Inter;font-size:15px"></div><div id="sr" style="flex:1;overflow-y:auto"></div></div>
 <div id="panel"><div class="handle"></div><div style="padding:8px 16px 12px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center"><div id="pt" style="font-size:16px;font-weight:600"></div><button onclick="cp()" style="background:rgba(255,255,255,.06);border:none;color:var(--t2);cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button></div><div id="pb" style="flex:1;overflow-y:auto;overscroll-behavior:contain"></div></div>
@@ -143,8 +143,8 @@ setInterval(()=>{fetch('https://api.rainviewer.com/public/weather-maps.json').th
 // WHITE airplane icon using data URI approach for guaranteed white color
 function mkI(hd,em,sel){
   const sz=sel?26:17;
-  const color=em?'rgb(255,64,88)':sel?'rgb(45,212,160)':'rgb(255,255,255)';
-  const shadow=em?'0 0 4px rgba(255,64,88,.7)':sel?'0 0 4px rgba(45,212,160,.6)':'0 0 3px rgba(255,255,255,.5)';
+  const color=em?'rgb(255,64,88)':sel?'rgb(92,200,240)':'rgb(220,240,255)';
+  const shadow=em?'0 0 4px rgba(255,64,88,.7)':sel?'0 0 6px rgba(92,200,240,.7)':'0 0 3px rgba(180,220,255,.4)';
   return L.divIcon({
     html:`<div style="width:${sz}px;height:${sz}px;transform:rotate(${hd}deg);filter:drop-shadow(${shadow})">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${sz}" height="${sz}">
@@ -154,11 +154,11 @@ function mkI(hd,em,sel){
   });
 }
 
-AP.forEach(a=>{const m=L.marker([a.la,a.ln],{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#4494f8;border:2px solid #1e3050;box-shadow:0 0 8px #4494f844"></div>`,iconSize:[14,14],iconAnchor:[7,7],className:''})}).addTo(map);m.on('click',()=>showAP(a));m.bindTooltip(a.c,{direction:'top',offset:[0,-10]});});
+AP.forEach(a=>{const m=L.marker([a.la,a.ln],{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#5cc8f0;border:2px solid #0f1f3a;box-shadow:0 0 10px #3bb8e855"></div>`,iconSize:[14,14],iconAnchor:[7,7],className:''})}).addTo(map);m.on('click',()=>showAP(a));m.bindTooltip(a.c,{direction:'top',offset:[0,-10]});});
 
 const acM={};let rtLine=null;
 function render(){fl.forEach(f=>{const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500',sel=sf?.id===f.id;if(acM[f.id]){acM[f.id].setLatLng([f.la,f.ln]);acM[f.id].setIcon(mkI(f.hd,em,sel));}else{const m=L.marker([f.la,f.ln],{icon:mkI(f.hd,em,sel)});m.on('click',()=>selF(f));m.addTo(map);acM[f.id]=m;}});}
-function showRt(){if(rtLine){map.removeLayer(rtLine);rtLine=null;}if(!sf)return;rtLine=L.polyline([[sf.o.la,sf.o.ln],[sf.la,sf.ln],[sf.d.la,sf.d.ln]],{color:'#2dd4a0',weight:2,opacity:.65,dashArray:'8,6'}).addTo(map);}
+function showRt(){if(rtLine){map.removeLayer(rtLine);rtLine=null;}if(!sf)return;rtLine=L.polyline([[sf.o.la,sf.o.ln],[sf.la,sf.ln],[sf.d.la,sf.d.ln]],{color:'#3bb8e8',weight:2,opacity:.7,dashArray:'8,6'}).addTo(map);}
 
 function selF(f){sf=f;render();showRt();map.closePopup();
   const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500';
@@ -168,16 +168,16 @@ function selF(f){sf=f;render();showRt();map.closePopup();
     ${em?`<div style="padding:8px 10px;background:rgba(255,64,88,.1);border-radius:10px;margin-bottom:12px;color:#ff4058;font-size:12px;font-weight:600">⚠ EMERGENCY SQUAWK ${f.sq}</div>`:''}
     <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid rgba(255,255,255,.06)">
       <div style="text-align:center"><div style="font-family:'JetBrains Mono';font-size:20px;font-weight:700">${f.o.c}</div><div style="font-size:10px;color:#8094b0">${f.o.ci}</div></div>
-      <div style="display:flex;align-items:center"><span style="color:#fff;font-size:11px">✈</span></div>
+      <div style="display:flex;align-items:center"><span style="color:#3bb8e8;font-size:11px">✈</span></div>
       <div style="text-align:center"><div style="font-family:'JetBrains Mono';font-size:20px;font-weight:700">${f.d.c}</div><div style="font-size:10px;color:#8094b0">${f.d.ci}</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-      <div style="background:rgba(0,0,0,.25);padding:10px;border-radius:10px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase">Altitude</div><div style="font-family:'JetBrains Mono';font-size:15px;font-weight:600;color:#2dd4a0;margin-top:3px">FL${~~(f.alt/100)}</div></div>
+      <div style="background:rgba(0,0,0,.25);padding:10px;border-radius:10px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase">Altitude</div><div style="font-family:'JetBrains Mono';font-size:15px;font-weight:600;color:#5cc8f0;margin-top:3px">FL${~~(f.alt/100)}</div></div>
       <div style="background:rgba(0,0,0,.25);padding:10px;border-radius:10px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase">Speed</div><div style="font-family:'JetBrains Mono';font-size:15px;font-weight:600;color:#fff;margin-top:3px">${f.spd} kts</div></div>
-      <div style="background:rgba(0,0,0,.25);padding:10px;border-radius:10px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase">Status</div><div style="font-size:13px;font-weight:600;color:${f.st==='En Route'?'#2dd4a0':'#eda630'};margin-top:3px">${f.st}</div></div>
+      <div style="background:rgba(0,0,0,.25);padding:10px;border-radius:10px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase">Status</div><div style="font-size:13px;font-weight:600;color:${f.st==='En Route'?'#5cc8f0':'#7ea8cc'};margin-top:3px">${f.st}</div></div>
       <div style="background:rgba(0,0,0,.25);padding:10px;border-radius:10px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase">Aircraft</div><div style="font-size:12px;font-weight:600;color:#fff;margin-top:3px">${f.ac.c}</div></div>
     </div>
-    <button onclick="showDetail('${f.id}')" style="width:100%;margin-top:12px;padding:11px;background:rgba(237,166,48,.1);border:1px solid rgba(237,166,48,.15);border-radius:12px;color:#eda630;font-family:Inter;font-size:13px;font-weight:600;cursor:pointer">View Full Details →</button>
+    <button onclick="showDetail('${f.id}')" style="width:100%;margin-top:12px;padding:11px;background:rgba(59,184,232,.1);border:1px solid rgba(59,184,232,.2);border-radius:12px;color:#3bb8e8;font-family:Inter;font-size:13px;font-weight:600;cursor:pointer">View Full Details →</button>
   </div>`).openOn(map);}
 
 window.showDetail=function(id){const f=fl.find(x=>x.id===id);if(!f)return;map.closePopup();sf=f;render();showRt();
