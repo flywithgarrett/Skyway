@@ -6,182 +6,196 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1221">
 <title>SkyWay — Live Flight Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
-:root{--bg:#0b1221;--s1:#111a2e;--s2:#162037;--bd:#1e3050;--a:#f0a030;--em:#ff3b4f;--g:#34d399;--bl:#3b82f6;--t:#e8edf5;--t2:#8899b0;--t3:#445570;--glass:rgba(17,26,46,.85)}
+:root{--bg:#0c1322;--s1:#121c30;--s2:#182440;--bd:#243352;--a:#eda630;--em:#ff4058;--g:#2dd4a0;--bl:#4494f8;--t:#eaf0f8;--t2:#8094b0;--t3:#4a5e78}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif}
-.m{font-family:'DM Mono',monospace}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--t);font-family:'Inter',system-ui,sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
 #map{position:fixed;inset:0;z-index:0}
-.leaflet-container{background:#080e1a!important;font-family:'DM Sans',sans-serif}
+.leaflet-container{background:#080e1a!important}
 .leaflet-control-zoom,.leaflet-control-attribution{display:none!important}
-
-/* Top bar */
-#top{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(180deg,#0b1221 0%,#0b122100 100%);pointer-events:none}
+.leaflet-popup-content-wrapper{background:rgba(18,28,48,.92)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1)!important;border-radius:14px!important;box-shadow:0 8px 32px rgba(0,0,0,.5)!important;color:#fff!important;padding:0!important}
+.leaflet-popup-content{margin:0!important;min-width:220px}
+.leaflet-popup-tip{background:rgba(18,28,48,.92)!important;border:1px solid rgba(255,255,255,.1)!important}
+.leaflet-popup-close-button{color:var(--t3)!important;font-size:20px!important;right:8px!important;top:6px!important}
+.leaflet-tooltip{background:rgba(18,28,48,.9)!important;color:var(--bl)!important;border:1px solid rgba(68,148,248,.3)!important;border-radius:8px!important;font-family:'JetBrains Mono',monospace!important;font-size:11px!important;font-weight:500!important;padding:3px 8px!important}
+.leaflet-tooltip-top:before{border-top-color:rgba(68,148,248,.3)!important}
+#top{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(180deg,rgba(12,19,34,.95) 0%,rgba(12,19,34,0) 100%);pointer-events:none}
 #top>*{pointer-events:auto}
-
-/* Bottom nav */
-#nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;display:flex;padding:6px 12px calc(env(safe-area-inset-bottom,8px) + 6px);background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.06)}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--t3);cursor:pointer;padding:6px 0;font-family:'DM Sans';font-size:10px;font-weight:500;transition:color .2s}
-.nb.on{color:var(--a)}
-.nb svg{width:20px;height:20px}
-
-/* Panel */
-#panel{position:fixed;bottom:0;left:0;right:0;z-index:900;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);max-height:75vh;display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.08)}
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;display:flex;padding:4px 8px calc(env(safe-area-inset-bottom,8px) + 4px);background:rgba(12,19,34,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.06)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--t3);cursor:pointer;padding:8px 0;font-family:'Inter';font-size:10px;font-weight:500;transition:color .2s}.nb.on{color:var(--a)}.nb svg{width:22px;height:22px}
+#panel{position:fixed;bottom:0;left:0;right:0;z-index:900;background:rgba(18,28,48,.92);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);max-height:75vh;display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.08)}
 #panel.open{transform:translateY(0)}
-.handle{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:4px;margin:10px auto 6px}
-
-/* Search */
-#search{position:fixed;inset:0;z-index:2000;background:rgba(11,18,33,.95);backdrop-filter:blur(24px);display:none;flex-direction:column}
-#search.open{display:flex}
-
-/* Cards */
-.fc{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s}
-.fc:hover{background:rgba(255,255,255,.03)}
-.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:600;letter-spacing:.3px}
-.am{padding:8px 12px;margin-bottom:4px;border-radius:8px;background:rgba(0,0,0,.2);border-left:3px solid}
-.stat-card{flex:1;padding:14px;background:rgba(0,0,0,.2);border-radius:14px;border:1px solid rgba(255,255,255,.04);text-align:center}
-.btn{display:block;text-align:center;padding:12px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s}
-.btn:hover{filter:brightness(1.15)}
-
-/* Tooltip style for airports */
-.leaflet-tooltip{background:var(--s1)!important;color:var(--bl)!important;border:1px solid var(--bd)!important;border-radius:6px!important;font-family:'DM Mono',monospace!important;font-size:11px!important;font-weight:500!important;padding:2px 6px!important;box-shadow:0 4px 12px rgba(0,0,0,.3)!important}
-.leaflet-tooltip-top:before{border-top-color:var(--bd)!important}
+.handle{width:36px;height:4px;background:rgba(255,255,255,.12);border-radius:4px;margin:10px auto 6px}
+#search{position:fixed;inset:0;z-index:2000;background:rgba(8,14,26,.96);backdrop-filter:blur(20px);display:none;flex-direction:column}#search.open{display:flex}
+.fc{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s}.fc:hover{background:rgba(255,255,255,.04)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.am{padding:8px 12px;margin-bottom:4px;border-radius:10px;background:rgba(0,0,0,.15);border-left:3px solid}
+.btn{display:block;text-align:center;padding:12px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.glass{background:rgba(18,28,48,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.06);border-radius:12px}
 </style>
 </head>
 <body>
 <div id="map"></div>
-
-<!-- TOP BAR -->
 <div id="top">
-  <div style="display:flex;align-items:center;gap:6px">
-    <div style="width:8px;height:8px;border-radius:50%;background:var(--a)"></div>
-    <span style="font-size:16px;font-weight:700;color:#fff;letter-spacing:1px">SkyWay</span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="width:9px;height:9px;border-radius:50%;background:var(--a);box-shadow:0 0 8px rgba(237,166,48,.4)"></div>
+    <span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px">SkyWay</span>
   </div>
-  <div onclick="openSearch()" style="flex:1;max-width:280px;display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--glass);backdrop-filter:blur(16px);border-radius:12px;border:1px solid rgba(255,255,255,.06);cursor:pointer">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#667" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <span style="font-size:12px;color:var(--t3)">Search flights, airports…</span>
+  <div onclick="openSearch()" style="flex:1;max-width:300px;display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:12px;cursor:pointer" class="glass">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span style="font-size:13px;color:var(--t3)">Search flights, airports…</span>
   </div>
-  <div class="m" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--glass);backdrop-filter:blur(12px);border-radius:10px;border:1px solid rgba(255,255,255,.06)">
-    <div style="width:6px;height:6px;border-radius:50%;background:var(--g)"></div>
+  <div class="glass mono" style="display:flex;align-items:center;gap:6px;padding:7px 14px">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 6px rgba(45,212,160,.4)"></div>
     <span style="font-size:11px;color:var(--g);font-weight:500">LIVE</span>
     <span id="clock" style="font-size:11px;color:var(--t2)"></span>
   </div>
 </div>
-
-<!-- SEARCH -->
 <div id="search">
-  <div style="padding:12px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)">
-    <button onclick="closeSearch()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:16px">✕</button>
-    <input id="si" type="text" placeholder="Search flights, airports, airlines…" autofocus style="flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px 16px;outline:none;color:#fff;font-family:'DM Sans';font-size:15px">
+  <div style="padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)">
+    <button onclick="closeSearch()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px">✕</button>
+    <input id="si" type="text" placeholder="Search flights, airports, airlines…" autofocus style="flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px 16px;outline:none;color:#fff;font-family:Inter;font-size:15px">
   </div>
   <div id="sr" style="flex:1;overflow-y:auto"></div>
 </div>
-
-<!-- PANEL -->
-<div id="panel"><div class="handle"></div><div style="padding:6px 16px 10px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center"><div id="pt" style="font-size:15px;font-weight:600"></div><button onclick="cp()" style="background:rgba(255,255,255,.06);border:none;color:var(--t2);cursor:pointer;width:28px;height:28px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button></div><div class="pb" id="pb" style="flex:1;overflow-y:auto;overscroll-behavior:contain"></div></div>
-
-<!-- BOTTOM NAV -->
+<div id="panel"><div class="handle"></div><div style="padding:8px 16px 12px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center"><div id="pt" style="font-size:16px;font-weight:600"></div><button onclick="cp()" style="background:rgba(255,255,255,.06);border:none;color:var(--t2);cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .15s">✕</button></div><div id="pb" style="flex:1;overflow-y:auto;overscroll-behavior:contain"></div></div>
 <div id="nav">
   <button class="nb on" data-t="map" onclick="sw('map')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Map</button>
   <button class="nb" data-t="flights" onclick="sw('flights')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>Flights</button>
   <button class="nb" data-t="airports" onclick="sw('airports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Airports</button>
-  <button class="nb" data-t="atc" onclick="sw('atc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>ATC</button>
+  <button class="nb" data-t="atc" onclick="sw('atc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>ATC</button>
   <button class="nb" data-t="alerts" onclick="sw('alerts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Alerts</button>
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-const AL=[{c:"UAL",n:"United",cl:"#3B82F6",l:"UA"},{c:"DAL",n:"Delta",cl:"#1E40AF",l:"DL"},{c:"AAL",n:"American",cl:"#DC2626",l:"AA"},{c:"SWA",n:"Southwest",cl:"#EA580C",l:"WN"},{c:"BAW",n:"British Airways",cl:"#1E3A5F",l:"BA"},{c:"DLH",n:"Lufthansa",cl:"#1D4ED8",l:"LH"},{c:"AFR",n:"Air France",cl:"#1E3A8A",l:"AF"},{c:"UAE",n:"Emirates",cl:"#DC2626",l:"EK"},{c:"QFA",n:"Qantas",cl:"#DC2626",l:"QF"},{c:"SIA",n:"Singapore",cl:"#CA8A04",l:"SQ"},{c:"ANA",n:"ANA",cl:"#1D4ED8",l:"NH"},{c:"JAL",n:"JAL",cl:"#DC2626",l:"JL"},{c:"KLM",n:"KLM",cl:"#2563EB",l:"KL"},{c:"THY",n:"Turkish",cl:"#DC2626",l:"TK"},{c:"CPA",n:"Cathay",cl:"#047857",l:"CX"},{c:"RYR",n:"Ryanair",cl:"#1D4ED8",l:"FR"},{c:"ACA",n:"Air Canada",cl:"#DC2626",l:"AC"},{c:"ETH",n:"Ethiopian",cl:"#047857",l:"ET"}];
-const AP=[{c:"KJFK",n:"JFK Intl",ci:"New York",co:"US",la:40.64,ln:-73.78,fd:"kjfk_gnd_twr"},{c:"KLAX",n:"LAX",ci:"Los Angeles",co:"US",la:33.94,ln:-118.41,fd:"klax_twr"},{c:"KORD",n:"O'Hare",ci:"Chicago",co:"US",la:41.97,ln:-87.91,fd:"kord_twr"},{c:"KATL",n:"Hartsfield-Jackson",ci:"Atlanta",co:"US",la:33.64,ln:-84.43,fd:"katl_twr"},{c:"KCLT",n:"Charlotte Douglas",ci:"Charlotte",co:"US",la:35.21,ln:-80.94,fd:"kclt_twr"},{c:"KDFW",n:"DFW",ci:"Dallas",co:"US",la:32.9,ln:-97.04,fd:"kdfw_twr"},{c:"KDEN",n:"Denver Intl",ci:"Denver",co:"US",la:39.86,ln:-104.67,fd:"kden_twr"},{c:"KSFO",n:"SFO",ci:"San Francisco",co:"US",la:37.62,ln:-122.38,fd:"ksfo_twr"},{c:"KMIA",n:"Miami Intl",ci:"Miami",co:"US",la:25.8,ln:-80.29,fd:"kmia_twr"},{c:"KBOS",n:"Logan",ci:"Boston",co:"US",la:42.37,ln:-71.02,fd:"kbos_twr"},{c:"KSEA",n:"Seattle-Tacoma",ci:"Seattle",co:"US",la:47.45,ln:-122.31,fd:"ksea_twr"},{c:"EGLL",n:"Heathrow",ci:"London",co:"UK",la:51.47,ln:-.45,fd:"egll_twr"},{c:"LFPG",n:"CDG",ci:"Paris",co:"FR",la:49.01,ln:2.55,fd:"lfpg_twr"},{c:"EDDF",n:"Frankfurt",ci:"Frankfurt",co:"DE",la:50.04,ln:8.56,fd:"eddf_twr"},{c:"EHAM",n:"Schiphol",ci:"Amsterdam",co:"NL",la:52.31,ln:4.76,fd:"eham_twr"},{c:"RJTT",n:"Haneda",ci:"Tokyo",co:"JP",la:35.55,ln:139.78,fd:"rjtt_twr"},{c:"VHHH",n:"Hong Kong",ci:"Hong Kong",co:"HK",la:22.31,ln:113.92,fd:"vhhh_twr"},{c:"OMDB",n:"Dubai Intl",ci:"Dubai",co:"AE",la:25.25,ln:55.36,fd:"omdb_twr"},{c:"WSSS",n:"Changi",ci:"Singapore",co:"SG",la:1.35,ln:103.99,fd:"wsss_twr"},{c:"YSSY",n:"Sydney",ci:"Sydney",co:"AU",la:-33.95,ln:151.18,fd:"yssy_twr"},{c:"SBGR",n:"Guarulhos",ci:"São Paulo",co:"BR",la:-23.44,ln:-46.47,fd:"sbgr_twr"},{c:"VIDP",n:"Delhi",ci:"New Delhi",co:"IN",la:28.56,ln:77.1,fd:"vidp_twr"},{c:"ZBAA",n:"Beijing Capital",ci:"Beijing",co:"CN",la:40.08,ln:116.6,fd:"zbaa_twr"},{c:"FAOR",n:"O.R. Tambo",ci:"Johannesburg",co:"ZA",la:-26.14,ln:28.25,fd:"faor_twr"},{c:"LTFM",n:"Istanbul",ci:"Istanbul",co:"TR",la:41.26,ln:28.74,fd:"ltfm_twr"}];
-const AC=[{c:"B738",n:"Boeing 737-800"},{c:"B77W",n:"777-300ER"},{c:"A320",n:"A320neo"},{c:"A388",n:"A380"},{c:"B789",n:"787-9"},{c:"A359",n:"A350-900"},{c:"B744",n:"747-400"},{c:"A321",n:"A321neo"},{c:"E175",n:"E175"},{c:"CRJ9",n:"CRJ-900"},{c:"B39M",n:"MAX 9"},{c:"B763",n:"767-300"}];
-const R=a=>a[~~(Math.random()*a.length)];
+const AL=[{c:"UAL",n:"United Airlines",cl:"#3B82F6",l:"UA"},{c:"DAL",n:"Delta Air Lines",cl:"#1E40AF",l:"DL"},{c:"AAL",n:"American Airlines",cl:"#DC2626",l:"AA"},{c:"SWA",n:"Southwest Airlines",cl:"#EA580C",l:"WN"},{c:"BAW",n:"British Airways",cl:"#1E3A5F",l:"BA"},{c:"DLH",n:"Lufthansa",cl:"#0369A1",l:"LH"},{c:"AFR",n:"Air France",cl:"#1E3A8A",l:"AF"},{c:"UAE",n:"Emirates",cl:"#B91C1C",l:"EK"},{c:"QFA",n:"Qantas",cl:"#DC2626",l:"QF"},{c:"SIA",n:"Singapore Airlines",cl:"#CA8A04",l:"SQ"},{c:"ANA",n:"ANA",cl:"#1D4ED8",l:"NH"},{c:"JAL",n:"Japan Airlines",cl:"#B91C1C",l:"JL"},{c:"KLM",n:"KLM",cl:"#2563EB",l:"KL"},{c:"THY",n:"Turkish Airlines",cl:"#DC2626",l:"TK"},{c:"CPA",n:"Cathay Pacific",cl:"#047857",l:"CX"},{c:"RYR",n:"Ryanair",cl:"#1D4ED8",l:"FR"},{c:"ACA",n:"Air Canada",cl:"#DC2626",l:"AC"},{c:"JBU",n:"JetBlue",cl:"#2563EB",l:"B6"}];
+const AP=[{c:"KJFK",n:"John F. Kennedy Intl",ci:"New York",co:"US",la:40.64,ln:-73.78,fd:"kjfk_gnd_twr"},{c:"KLAX",n:"Los Angeles Intl",ci:"Los Angeles",co:"US",la:33.94,ln:-118.41,fd:"klax_twr"},{c:"KORD",n:"O'Hare Intl",ci:"Chicago",co:"US",la:41.97,ln:-87.91,fd:"kord_twr"},{c:"KATL",n:"Hartsfield-Jackson",ci:"Atlanta",co:"US",la:33.64,ln:-84.43,fd:"katl_twr"},{c:"KCLT",n:"Charlotte Douglas",ci:"Charlotte",co:"US",la:35.21,ln:-80.94,fd:"kclt_twr"},{c:"KDFW",n:"Dallas/Fort Worth",ci:"Dallas",co:"US",la:32.9,ln:-97.04,fd:"kdfw_twr"},{c:"KDEN",n:"Denver Intl",ci:"Denver",co:"US",la:39.86,ln:-104.67,fd:"kden_twr"},{c:"KSFO",n:"San Francisco Intl",ci:"San Francisco",co:"US",la:37.62,ln:-122.38,fd:"ksfo_twr"},{c:"KMIA",n:"Miami Intl",ci:"Miami",co:"US",la:25.8,ln:-80.29,fd:"kmia_twr"},{c:"KBOS",n:"Logan Intl",ci:"Boston",co:"US",la:42.37,ln:-71.02,fd:"kbos_twr"},{c:"KSEA",n:"Seattle-Tacoma",ci:"Seattle",co:"US",la:47.45,ln:-122.31,fd:"ksea_twr"},{c:"EGLL",n:"London Heathrow",ci:"London",co:"UK",la:51.47,ln:-.45,fd:"egll_twr"},{c:"LFPG",n:"Charles de Gaulle",ci:"Paris",co:"FR",la:49.01,ln:2.55,fd:"lfpg_twr"},{c:"EDDF",n:"Frankfurt",ci:"Frankfurt",co:"DE",la:50.04,ln:8.56,fd:"eddf_twr"},{c:"EHAM",n:"Schiphol",ci:"Amsterdam",co:"NL",la:52.31,ln:4.76,fd:"eham_twr"},{c:"RJTT",n:"Haneda",ci:"Tokyo",co:"JP",la:35.55,ln:139.78,fd:"rjtt_twr"},{c:"VHHH",n:"Hong Kong Intl",ci:"Hong Kong",co:"HK",la:22.31,ln:113.92,fd:"vhhh_twr"},{c:"OMDB",n:"Dubai Intl",ci:"Dubai",co:"AE",la:25.25,ln:55.36,fd:"omdb_twr"},{c:"WSSS",n:"Changi",ci:"Singapore",co:"SG",la:1.35,ln:103.99,fd:"wsss_twr"},{c:"YSSY",n:"Sydney Kingsford Smith",ci:"Sydney",co:"AU",la:-33.95,ln:151.18,fd:"yssy_twr"},{c:"SBGR",n:"Guarulhos",ci:"São Paulo",co:"BR",la:-23.44,ln:-46.47,fd:"sbgr_twr"},{c:"VIDP",n:"Indira Gandhi Intl",ci:"New Delhi",co:"IN",la:28.56,ln:77.1,fd:"vidp_twr"},{c:"FAOR",n:"O.R. Tambo Intl",ci:"Johannesburg",co:"ZA",la:-26.14,ln:28.25,fd:"faor_twr"},{c:"LTFM",n:"Istanbul Airport",ci:"Istanbul",co:"TR",la:41.26,ln:28.74,fd:"ltfm_twr"},{c:"ZBAA",n:"Beijing Capital",ci:"Beijing",co:"CN",la:40.08,ln:116.6,fd:"zbaa_twr"}];
+const AC=[{c:"B738",n:"Boeing 737-800"},{c:"B77W",n:"Boeing 777-300ER"},{c:"A320",n:"Airbus A320neo"},{c:"A388",n:"Airbus A380-800"},{c:"B789",n:"Boeing 787-9 Dreamliner"},{c:"A359",n:"Airbus A350-900"},{c:"B744",n:"Boeing 747-400"},{c:"A321",n:"Airbus A321neo"},{c:"E175",n:"Embraer E175"},{c:"CRJ9",n:"CRJ-900"},{c:"B39M",n:"Boeing 737 MAX 9"},{c:"B763",n:"Boeing 767-300ER"}];
+const P=a=>a[~~(Math.random()*a.length)];
 
-let fl=[];for(let i=0;i<1000;i++){const al=R(AL),o=R(AP);let d=R(AP);while(d.c===o.c)d=R(AP);const ac=R(AC),p=Math.random(),la=Math.max(-75,Math.min(75,o.la+(d.la-o.la)*p+(Math.random()-.5)*5)),ln=((o.ln+(d.ln-o.ln)*p+(Math.random()-.5)*5+180)%360)-180,alt=~~(12000+Math.random()*30000),isEm=Math.random()<.007;
-fl.push({id:`${al.c}${10+~~(Math.random()*9990)}`,al,o,d,ac,la,ln,alt,sp:~~(280+Math.random()*300),hd:~~(Math.atan2(d.ln-o.ln,d.la-o.la)*180/Math.PI+360)%360,st:alt<10000?(p<.1?"Departing":"Arriving"):"En Route",pg:~~(p*100),sq:isEm?"7700":`${1200+~~(Math.random()*5500)}`,vr:~~((Math.random()-.5)*3000),rg:`N${100+~~(Math.random()*900)}${String.fromCharCode(65+~~(Math.random()*26))}${String.fromCharCode(65+~~(Math.random()*26))}`});}
+let fl=[];for(let i=0;i<1000;i++){const al=P(AL),o=P(AP);let d=P(AP);while(d.c===o.c)d=P(AP);const ac=P(AC),p=Math.random();
+let la=o.la+(d.la-o.la)*p+(Math.random()-.5)*5,ln=o.ln+(d.ln-o.ln)*p+(Math.random()-.5)*5;
+const alt=~~(8000+Math.random()*34000),spd=alt>25000?~~(420+Math.random()*130):~~(180+Math.random()*250);
+const isEm=Math.random()<.006;
+let st;if(p<.08)st="Departing";else if(p>.92)st="On Approach";else if(alt<15000)st=p<.5?"Climbing":"Descending";else st="En Route";
+fl.push({id:`${al.l}${1000+~~(Math.random()*8999)}`,al,o,d,ac,la:Math.max(-72,Math.min(72,la)),ln:((ln+180)%360)-180,alt,spd,hd:~~(Math.atan2(d.ln-o.ln,d.la-o.la)*180/Math.PI+360)%360,st,pg:~~(p*100),sq:isEm?P(["7700","7600","7500"]):`${2000+~~(Math.random()*4700)}`,vr:st==="Climbing"?~~(Math.random()*2500+500):st==="Descending"?-~~(Math.random()*2000+300):~~((Math.random()-.5)*400),rg:`${P(["N","G-","D-","F-","C-","VH-","JA","B-"])}${100+~~(Math.random()*9899)}`});}
 
 let sf=null,sa=AP[0],am=[];
 
-// MAP
-const map=L.map('map',{zoomControl:false,attributionControl:false,minZoom:2,maxZoom:16,worldCopyJump:true}).setView([32,-40],3);
+const map=L.map('map',{zoomControl:false,attributionControl:false,minZoom:2,maxZoom:15}).setView([30,-20],3);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd'}).addTo(map);
 
-// Aircraft icon - BRIGHT and visible
-function aI(hdg,em,sel){
-  const c=em?'%23ff3b4f':sel?'%2334d399':'%23f0a030';
-  const s=sel?24:16;
-  return L.divIcon({html:`<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 32 32" style="transform:rotate(${hdg}deg);filter:drop-shadow(0 0 ${em?'4':'2'}px ${em?'%23ff3b4f80':sel?'%2334d39980':'%23f0a03060'})"><path d="M16 3l-3 8H5l2 5-2 5h8l3 8 3-8h8l-2-5 2-5h-8l-3-8z" fill="${c}"/></svg>`,iconSize:[s,s],iconAnchor:[s/2,s/2],className:''});}
+// PROPER airplane icon using the standard airplane SVG path - BRIGHT colors
+function mkIcon(hd,em,sel){
+const fill=em?'%23ff4058':sel?'%232dd4a0':'%23eda630';
+const glow=em?'%23ff405880':sel?'%232dd4a060':'%23eda63050';
+const sz=sel?26:18;
+// Actual airplane silhouette path
+return L.divIcon({html:`<svg xmlns="http://www.w3.org/2000/svg" width="${sz}" height="${sz}" viewBox="0 0 24 24" style="transform:rotate(${hd}deg);filter:drop-shadow(0 0 3px ${glow})"><path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="${fill}"/></svg>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:''});}
 
-// Airport icon
-function apI(sel){const s=sel?14:10;return L.divIcon({html:`<div style="width:${s}px;height:${s}px;border-radius:50%;background:${sel?'#3b82f6':'#2563EB'};border:2px solid ${sel?'#93c5fd':'#1e3a5f'};box-shadow:0 0 ${sel?'8':'4'}px ${sel?'#3b82f680':'#2563eb40'}"></div>`,iconSize:[s+4,s+4],iconAnchor:[(s+4)/2,(s+4)/2],className:''});}
-
-AP.forEach(a=>{const m=L.marker([a.la,a.ln],{icon:apI(false)}).addTo(map);m.on('click',()=>showAP(a));m.bindTooltip(a.c,{permanent:false,direction:'top',offset:[0,-10]});});
+AP.forEach(a=>{const m=L.marker([a.la,a.ln],{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#4494f8;border:2px solid #1e3a5f;box-shadow:0 0 6px #4494f840"></div>`,iconSize:[14,14],iconAnchor:[7,7],className:''})}).addTo(map);m.on('click',()=>showAP(a));m.bindTooltip(a.c,{direction:'top',offset:[0,-10]});});
 
 const acM={};let rtLine=null;
-function render(){fl.forEach(f=>{const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500',sel=sf?.id===f.id;if(acM[f.id]){acM[f.id].setLatLng([f.la,f.ln]);acM[f.id].setIcon(aI(f.hd,em,sel));}else{const m=L.marker([f.la,f.ln],{icon:aI(f.hd,em,sel)});m.on('click',()=>selF(f));m.addTo(map);acM[f.id]=m;}});}
+function render(){fl.forEach(f=>{const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500',sel=sf?.id===f.id;if(acM[f.id]){acM[f.id].setLatLng([f.la,f.ln]);acM[f.id].setIcon(mkIcon(f.hd,em,sel));}else{const m=L.marker([f.la,f.ln],{icon:mkIcon(f.hd,em,sel)});m.on('click',()=>selF(f));m.addTo(map);acM[f.id]=m;}});}
 
-function showRt(){if(rtLine){map.removeLayer(rtLine);rtLine=null;}if(!sf)return;const pts=[[sf.o.la,sf.o.ln],[sf.la,sf.ln],[sf.d.la,sf.d.ln]];rtLine=L.polyline(pts,{color:'#34d399',weight:2,opacity:.7,dashArray:'8,6'}).addTo(map);}
+function showRt(){if(rtLine){map.removeLayer(rtLine);rtLine=null;}if(!sf)return;rtLine=L.polyline([[sf.o.la,sf.o.ln],[sf.la,sf.ln],[sf.d.la,sf.d.ln]],{color:'#2dd4a0',weight:2,opacity:.6,dashArray:'8,6'}).addTo(map);}
 
-function selF(f){sf=f;render();showRt();map.flyTo([f.la,f.ln],Math.max(map.getZoom(),6),{duration:.6});
+// POPUP TAG when clicking aircraft
+function selF(f){
+  sf=f;render();showRt();
+  // Close any existing popup
+  map.closePopup();
+  // Create Apple-style popup tag
   const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500';
-  const D=(l,v,c)=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="color:var(--t2);font-size:12px">${l}</span><span class="m" style="color:${c||'#fff'};font-size:13px;font-weight:500">${v}</span></div>`;
-  document.getElementById('pt').innerHTML=`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${f.al.cl}"></div><span style="color:${em?'var(--em)':'#fff'}">${f.id}</span><span style="color:var(--t2);font-weight:400;font-size:12px">${f.al.n}</span></div>`;
+  const popup=L.popup({closeButton:true,className:'',maxWidth:280,offset:[0,-8]})
+    .setLatLng([f.la,f.ln])
+    .setContent(`<div style="padding:14px;font-family:Inter,system-ui,sans-serif">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${f.al.cl};box-shadow:0 0 6px ${f.al.cl}60"></div>
+        <span style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.5px">${f.id}</span>
+      </div>
+      <div style="font-size:12px;color:#8094b0;margin-bottom:10px">${f.al.n} · ${f.ac.n}</div>
+      ${em?`<div style="padding:6px 10px;background:rgba(255,64,88,.12);border-radius:8px;margin-bottom:10px;color:#ff4058;font-size:12px;font-weight:600">⚠ EMERGENCY SQUAWK ${f.sq}</div>`:''}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.06)">
+        <div style="text-align:center"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#fff">${f.o.c}</div><div style="font-size:10px;color:#8094b0">${f.o.ci}</div></div>
+        <div style="display:flex;align-items:center;gap:4px"><div style="width:20px;height:1px;background:#eda630"></div><span style="font-size:10px;color:#eda630">✈</span><div style="width:20px;height:1px;background:#4494f8"></div></div>
+        <div style="text-align:center"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#fff">${f.d.c}</div><div style="font-size:10px;color:#8094b0">${f.d.ci}</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:rgba(0,0,0,.2);padding:8px;border-radius:8px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase;letter-spacing:.5px">Altitude</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:#2dd4a0;margin-top:2px">FL${~~(f.alt/100)}</div></div>
+        <div style="background:rgba(0,0,0,.2);padding:8px;border-radius:8px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase;letter-spacing:.5px">Speed</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:#fff;margin-top:2px">${f.spd} kts</div></div>
+        <div style="background:rgba(0,0,0,.2);padding:8px;border-radius:8px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase;letter-spacing:.5px">Status</div><div style="font-size:12px;font-weight:600;color:${f.st==='En Route'?'#2dd4a0':'#eda630'};margin-top:2px">${f.st}</div></div>
+        <div style="background:rgba(0,0,0,.2);padding:8px;border-radius:8px"><div style="font-size:9px;color:#4a5e78;text-transform:uppercase;letter-spacing:.5px">Aircraft</div><div style="font-size:12px;font-weight:600;color:#fff;margin-top:2px">${f.ac.c}</div></div>
+      </div>
+      <button onclick="showDetail('${f.id}')" style="width:100%;margin-top:10px;padding:10px;background:rgba(237,166,48,.12);border:1px solid rgba(237,166,48,.2);border-radius:10px;color:#eda630;font-family:Inter;font-size:12px;font-weight:600;cursor:pointer;border:none;letter-spacing:.3px">View Full Details →</button>
+    </div>`).openOn(map);
+}
+
+// Full detail panel
+window.showDetail=function(id){
+  const f=fl.find(x=>x.id===id);if(!f)return;
+  map.closePopup();
+  const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500';
+  const D=(l,v,c)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="color:var(--t2);font-size:12px">${l}</span><span class="mono" style="color:${c||'#fff'};font-size:13px;font-weight:500">${v}</span></div>`;
+  document.getElementById('pt').innerHTML=`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${f.al.cl}"></div><span>${f.id}</span><span style="font-weight:400;font-size:12px;color:var(--t2)">${f.al.n}</span></div>`;
   document.getElementById('pb').innerHTML=`<div style="padding:16px">
-    <div style="display:flex;align-items:center;justify-content:center;gap:20px;padding:20px;background:rgba(0,0,0,.25);border-radius:16px;margin-bottom:16px">
-      <div style="text-align:center"><div class="m" style="font-size:26px;font-weight:700">${f.o.c}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${f.o.ci}</div></div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="display:flex;align-items:center;gap:4px"><div style="width:24px;height:1px;background:linear-gradient(90deg,var(--a),transparent)"></div><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--a)" style="transform:rotate(90deg)"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg><div style="width:24px;height:1px;background:linear-gradient(90deg,transparent,var(--bl))"></div></div><div style="width:80px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:${f.pg}%;height:100%;background:var(--a);border-radius:2px"></div></div><div class="m" style="font-size:10px;color:var(--t3)">${f.pg}%</div></div>
-      <div style="text-align:center"><div class="m" style="font-size:26px;font-weight:700">${f.d.c}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${f.d.ci}</div></div>
+    <div style="display:flex;justify-content:center;gap:24px;padding:20px;background:rgba(0,0,0,.2);border-radius:16px;margin-bottom:16px">
+      <div style="text-align:center"><div class="mono" style="font-size:28px;font-weight:700">${f.o.c}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${f.o.ci}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font-size:14px;color:var(--a)">✈</div><div style="width:60px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:${f.pg}%;height:100%;background:var(--a);border-radius:2px"></div></div><div class="mono" style="font-size:10px;color:var(--t3)">${f.pg}%</div></div>
+      <div style="text-align:center"><div class="mono" style="font-size:28px;font-weight:700">${f.d.c}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${f.d.ci}</div></div>
     </div>
-    ${em?`<div style="padding:10px 14px;background:rgba(255,59,79,.1);border:1px solid rgba(255,59,79,.2);border-radius:12px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">⚠️</span><span style="color:var(--em);font-size:13px;font-weight:600">EMERGENCY — SQUAWK ${f.sq}</span></div>`:''}
-    <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:10px;background:${f.st==='En Route'?'rgba(52,211,153,.1)':'rgba(240,160,48,.1)'};margin-bottom:14px"><div style="width:6px;height:6px;border-radius:50%;background:${f.st==='En Route'?'var(--g)':'var(--a)'}"></div><span style="font-size:11px;font-weight:600;color:${f.st==='En Route'?'var(--g)':'var(--a)'}">${f.st}</span></div>
-    ${D('Aircraft',f.ac.c+' · '+f.ac.n)}${D('Registration',f.rg)}${D('Altitude','FL'+~~(f.alt/100)+' · '+f.alt.toLocaleString()+' ft',f.alt>30000?'var(--g)':'var(--a)')}${D('Speed',f.sp+' kts · '+~~(f.sp*1.852)+' km/h')}${D('Heading',f.hd+'°')}${D('V/S',(f.vr>0?'+':'')+f.vr+' fpm',f.vr>0?'var(--g)':f.vr<0?'var(--em)':'var(--t)')}${D('Squawk',f.sq,em?'var(--em)':null)}${D('Position',f.la.toFixed(3)+'°, '+f.ln.toFixed(3)+'°')}
+    ${em?`<div style="padding:10px 14px;background:rgba(255,64,88,.08);border:1px solid rgba(255,64,88,.15);border-radius:12px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">⚠️</span><span style="color:var(--em);font-size:13px;font-weight:600">EMERGENCY — SQUAWK ${f.sq}</span></div>`:''}
+    <div class="tag" style="background:${f.st==='En Route'?'rgba(45,212,160,.1)':'rgba(237,166,48,.1)'};color:${f.st==='En Route'?'var(--g)':'var(--a)'};margin-bottom:14px">${f.st}</div>
+    ${D('Aircraft',f.ac.c+' — '+f.ac.n)}${D('Registration',f.rg)}${D('Altitude','FL'+~~(f.alt/100)+' ('+f.alt.toLocaleString()+' ft)',f.alt>30000?'var(--g)':'var(--a)')}${D('Ground Speed',f.spd+' kts ('+~~(f.spd*1.852)+' km/h)')}${D('Heading',f.hd+'°')}${D('Vertical Rate',(f.vr>0?'+':'')+f.vr+' fpm',f.vr>500?'var(--g)':f.vr<-500?'var(--em)':'var(--t)')}${D('Squawk',f.sq,em?'var(--em)':null)}${D('Position',f.la.toFixed(3)+'°, '+f.ln.toFixed(3)+'°')}
   </div>`;
-  document.getElementById('panel').classList.add('open');}
+  document.getElementById('panel').classList.add('open');
+};
 
 function showAP(a){sa=a;const arr=fl.filter(f=>f.d.c===a.c).slice(0,20),dep=fl.filter(f=>f.o.c===a.c).slice(0,20);
   document.getElementById('pt').innerHTML=`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--bl)"></div><span style="color:var(--bl)">${a.c}</span><span style="font-weight:400;font-size:12px;color:var(--t2)">${a.n}</span></div>`;
   document.getElementById('pb').innerHTML=`<div style="padding:16px">
-    <div style="display:flex;gap:10px;margin-bottom:16px"><div class="stat-card"><div style="font-size:28px;font-weight:700;color:var(--g)">${arr.length}</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Arrivals</div></div><div class="stat-card"><div style="font-size:28px;font-weight:700;color:var(--a)">${dep.length}</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Departures</div></div><div class="stat-card"><div style="font-size:28px;font-weight:700;color:var(--bl)">${arr.length+dep.length}</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Total</div></div></div>
-    <a href="https://www.liveatc.net/listen.php?mount=${a.fd}&icao=${a.c.toLowerCase()}" target="_blank" class="btn" style="background:rgba(52,211,153,.12);color:var(--g);border:1px solid rgba(52,211,153,.2);margin-bottom:16px">▶ Listen ATC Live — ${a.c}</a>
-    <div style="font-size:12px;font-weight:600;color:var(--g);margin-bottom:8px;letter-spacing:.5px">ARRIVING</div>
-    ${arr.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:12px;font-weight:500">${f.id}</span><span class="m" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2)">${f.o.c} → <strong>${f.d.c}</strong> · ${f.ac.c} · ${f.sp}kts</div></div></div>`).join('')}
-    <div style="font-size:12px;font-weight:600;color:var(--a);margin:16px 0 8px;letter-spacing:.5px">DEPARTING</div>
-    ${dep.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:12px;font-weight:500">${f.id}</span><span class="m" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2)"><strong>${f.o.c}</strong> → ${f.d.c} · ${f.ac.c}</div></div></div>`).join('')}
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <div style="flex:1;padding:16px;background:rgba(0,0,0,.2);border-radius:14px;text-align:center"><div style="font-size:32px;font-weight:700;color:var(--g)">${arr.length}</div><div style="font-size:11px;color:var(--t2);margin-top:4px">Arrivals</div></div>
+      <div style="flex:1;padding:16px;background:rgba(0,0,0,.2);border-radius:14px;text-align:center"><div style="font-size:32px;font-weight:700;color:var(--a)">${dep.length}</div><div style="font-size:11px;color:var(--t2);margin-top:4px">Departures</div></div>
+    </div>
+    <a href="https://www.liveatc.net/listen.php?mount=${a.fd}&icao=${a.c.toLowerCase()}" target="_blank" class="btn" style="background:rgba(45,212,160,.1);color:var(--g);border:1px solid rgba(45,212,160,.15);margin-bottom:18px">▶ Listen ATC Live — ${a.c}</a>
+    <div style="font-size:13px;font-weight:600;color:var(--g);margin-bottom:8px">Arriving</div>
+    ${arr.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:13px;font-weight:500">${f.id}</span><span class="mono" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)} · ${f.spd}kts</span></div><div style="font-size:11px;color:var(--t2);margin-top:2px">from <strong>${f.o.c}</strong> · ${f.al.n} · ${f.ac.c}</div></div></div>`).join('')}
+    <div style="font-size:13px;font-weight:600;color:var(--a);margin:18px 0 8px">Departing</div>
+    ${dep.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:13px;font-weight:500">${f.id}</span><span class="mono" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)} · ${f.spd}kts</span></div><div style="font-size:11px;color:var(--t2);margin-top:2px">to <strong>${f.d.c}</strong> · ${f.al.n} · ${f.ac.c}</div></div></div>`).join('')}
   </div>`;
   document.getElementById('panel').classList.add('open');}
 
 function sw(t){document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='map'){cp();return;}
   const pt=document.getElementById('pt'),pb=document.getElementById('pb');
-  if(t==='flights'){pt.innerHTML=`Flights <span style="font-weight:400;color:var(--t2);font-size:12px">${fl.length} tracked</span>`;pb.innerHTML=fl.slice(0,60).map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:12px;font-weight:500">${f.id}</span><span class="m" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2)">${f.o.c} → ${f.d.c} · ${f.al.n} · ${f.ac.c} · ${f.sp}kts</div></div></div>`).join('');}
-  else if(t==='airports'){pt.textContent='Airports';pb.innerHTML=AP.map(a=>`<div class="fc" onclick="showAP(AP.find(x=>x.c==='${a.c}'))"><div style="width:10px;height:10px;border-radius:50%;background:var(--bl)"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:14px;font-weight:500">${a.c}</span><span style="font-size:11px;color:var(--t3)">${a.co}</span></div><div style="font-size:12px;color:var(--t2)">${a.n} — ${a.ci}</div></div></div>`).join('');}
-  else if(t==='atc'){const TC={tower:'#ff3b4f',approach:'#3b82f6',ground:'#f0a030',center:'#a78bfa',departure:'#ec4899'};pt.innerHTML=`ATC <span class="m" style="color:var(--a);font-size:12px">${sa.c}</span>`;pb.innerHTML=`<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><select id="asel" onchange="sa=AP.find(a=>a.c===this.value);sw('atc')" style="width:100%;padding:10px 12px;background:var(--bg);color:#fff;border:1px solid var(--bd);border-radius:10px;font-family:'DM Sans';font-size:13px;outline:none">${AP.map(a=>`<option value="${a.c}" ${sa.c===a.c?'selected':''}>${a.c} — ${a.n}</option>`).join('')}</select></div><div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><a href="https://www.liveatc.net/listen.php?mount=${sa.fd}&icao=${sa.c.toLowerCase()}" target="_blank" class="btn" style="background:rgba(52,211,153,.12);color:var(--g);border:1px solid rgba(52,211,153,.2)">▶ Listen Live — ${sa.c}</a></div><div id="af" style="padding:8px 12px">${am.slice(-25).map(m=>`<div class="am" style="border-color:${TC[m.ty]||'#666'}"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:${(TC[m.ty]||'#666')}15;color:${TC[m.ty]||'#666'}">${m.ty}</span><span class="m" style="color:var(--a);font-weight:500;font-size:11px">${m.cs}</span></div><span class="m" style="color:var(--t3);font-size:9px">${m.t}Z</span></div><div class="m" style="color:var(--t2);font-size:10px;line-height:1.5">${m.msg}</div></div>`).join('')}</div>`;}
-  else if(t==='alerts'){const em=fl.filter(f=>f.sq==='7700'||f.sq==='7600'||f.sq==='7500');pt.innerHTML=`<span style="color:var(--em)">⚠ Alerts</span> <span style="font-weight:400;font-size:12px;color:var(--t2)">${em.length} active</span>`;pb.innerHTML=em.length?em.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))" style="border-left:3px solid var(--em)"><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:14px;font-weight:600;color:var(--em)">${f.id}</span><span class="tag" style="background:rgba(255,59,79,.12);color:var(--em)">SQUAWK ${f.sq}</span></div><div style="font-size:12px;color:var(--t2);margin-top:4px">${f.al.n} · ${f.ac.n} · ${f.rg}</div><div style="font-size:11px;color:var(--t3);margin-top:2px">${f.o.c} → ${f.d.c} · FL${~~(f.alt/100)} · ${f.sp}kts</div></div></div>`).join(''):`<div style="padding:60px 20px;text-align:center"><div style="font-size:40px;margin-bottom:12px">✈️</div><div style="color:var(--t2);font-size:14px">No active emergencies</div><div style="color:var(--t3);font-size:12px;margin-top:4px">All aircraft operating normally</div></div>`;}
+  if(t==='flights'){pt.innerHTML=`<span>Flights</span> <span style="font-weight:400;color:var(--t2);font-size:12px">${fl.length} tracked</span>`;pb.innerHTML=fl.slice(0,60).map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:13px;font-weight:500">${f.id}</span><span class="mono" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2);margin-top:1px">${f.o.c} → ${f.d.c} · ${f.al.n} · ${f.ac.c} · ${f.spd}kts</div></div></div>`).join('');}
+  else if(t==='airports'){pt.textContent='Airports';pb.innerHTML=AP.map(a=>`<div class="fc" onclick="showAP(AP.find(x=>x.c==='${a.c}'))"><div style="width:10px;height:10px;border-radius:50%;background:var(--bl)"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:14px;font-weight:500">${a.c}</span><span style="font-size:11px;color:var(--t3)">${a.co}</span></div><div style="font-size:12px;color:var(--t2);margin-top:2px">${a.n} — ${a.ci}</div></div></div>`).join('');}
+  else if(t==='atc'){const TC={tower:'#ff4058',approach:'#4494f8',ground:'#eda630',center:'#a78bfa',departure:'#ec4899'};pt.innerHTML=`ATC <span class="mono" style="color:var(--a);font-size:12px">${sa.c}</span>`;pb.innerHTML=`<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><select onchange="sa=AP.find(a=>a.c===this.value);sw('atc')" style="width:100%;padding:10px 12px;background:var(--bg);color:#fff;border:1px solid var(--bd);border-radius:10px;font-family:Inter;font-size:13px;outline:none;-webkit-appearance:none">${AP.map(a=>`<option value="${a.c}" ${sa.c===a.c?'selected':''}>${a.c} — ${a.n}</option>`).join('')}</select></div><div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><a href="https://www.liveatc.net/listen.php?mount=${sa.fd}&icao=${sa.c.toLowerCase()}" target="_blank" class="btn" style="background:rgba(45,212,160,.1);color:var(--g);border:1px solid rgba(45,212,160,.15)">▶ Listen Live — ${sa.c}</a></div><div id="af" style="padding:8px 12px">${am.slice(-25).map(m=>`<div class="am" style="border-color:${TC[m.ty]||'#4a5e78'}"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:${(TC[m.ty]||'#4a5e78')}18;color:${TC[m.ty]||'#4a5e78'};font-size:9px">${m.ty}</span><span class="mono" style="color:var(--a);font-weight:500;font-size:11px">${m.cs}</span></div><span class="mono" style="color:var(--t3);font-size:9px">${m.t}Z</span></div><div class="mono" style="color:var(--t2);font-size:10px;line-height:1.5">${m.msg}</div></div>`).join('')}</div>`;}
+  else if(t==='alerts'){const em=fl.filter(f=>f.sq==='7700'||f.sq==='7600'||f.sq==='7500');pt.innerHTML=`<span style="color:var(--em)">⚠ Alerts</span> <span style="font-weight:400;font-size:12px;color:var(--t2)">${em.length} active</span>`;pb.innerHTML=em.length?em.map(f=>`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'))" style="border-left:3px solid var(--em)"><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-size:15px;font-weight:600;color:var(--em)">${f.id}</span><span class="tag" style="background:rgba(255,64,88,.1);color:var(--em)">SQUAWK ${f.sq}</span></div><div style="font-size:12px;color:var(--t2);margin-top:4px">${f.al.n} · ${f.ac.n}</div><div style="font-size:11px;color:var(--t3);margin-top:2px">${f.o.c} → ${f.d.c} · FL${~~(f.alt/100)} · ${f.spd}kts · ${f.rg}</div></div></div>`).join(''):`<div style="padding:60px 20px;text-align:center"><div style="font-size:44px;margin-bottom:12px">✈️</div><div style="color:var(--t);font-size:15px;font-weight:600">All Clear</div><div style="color:var(--t3);font-size:12px;margin-top:4px">No active emergency aircraft</div></div>`;}
   document.getElementById('panel').classList.add('open');}
 
-function cp(){document.getElementById('panel').classList.remove('open');if(sf){sf=null;render();if(rtLine){map.removeLayer(rtLine);rtLine=null;}}}
+function cp(){document.getElementById('panel').classList.remove('open');map.closePopup();if(sf){sf=null;render();if(rtLine){map.removeLayer(rtLine);rtLine=null;}}}
 
-// Search
 function openSearch(){document.getElementById('search').classList.add('open');document.getElementById('si').focus();}
 function closeSearch(){document.getElementById('search').classList.remove('open');document.getElementById('si').value='';}
 document.getElementById('si').addEventListener('input',e=>{const q=e.target.value.toLowerCase(),sr=document.getElementById('sr');if(!q){sr.innerHTML='';return;}
-  const af=fl.filter(f=>f.id.toLowerCase().includes(q)||f.o.c.toLowerCase().includes(q)||f.d.c.toLowerCase().includes(q)||f.al.n.toLowerCase().includes(q)||f.o.ci.toLowerCase().includes(q)||f.ac.c.toLowerCase().includes(q)).slice(0,12);
-  const aa=AP.filter(a=>a.c.toLowerCase().includes(q)||a.n.toLowerCase().includes(q)||a.ci.toLowerCase().includes(q)).slice(0,5);
-  let h='';
-  if(aa.length){h+=`<div style="padding:10px 16px;font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.5px">AIRPORTS</div>`;aa.forEach(a=>{h+=`<div class="fc" onclick="showAP(AP.find(x=>x.c==='${a.c}'));closeSearch()"><div style="width:8px;height:8px;border-radius:50%;background:var(--bl)"></div><span class="m" style="color:var(--bl);font-size:14px;font-weight:500">${a.c}</span><span style="color:var(--t2);font-size:12px;margin-left:8px">${a.n} — ${a.ci}</span></div>`;});}
-  if(af.length){h+=`<div style="padding:10px 16px;font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.5px">FLIGHTS</div>`;af.forEach(f=>{h+=`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'));closeSearch()"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:13px;font-weight:500">${f.id}</span><span class="m" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2)">${f.o.c} → ${f.d.c} · ${f.al.n}</div></div></div>`;});}
-  sr.innerHTML=h||`<div style="padding:40px;text-align:center;color:var(--t3)">No results found</div>`;});
+const af=fl.filter(f=>f.id.toLowerCase().includes(q)||f.o.c.toLowerCase().includes(q)||f.d.c.toLowerCase().includes(q)||f.al.n.toLowerCase().includes(q)||f.o.ci.toLowerCase().includes(q)||f.ac.c.toLowerCase().includes(q)).slice(0,12);
+const aa=AP.filter(a=>a.c.toLowerCase().includes(q)||a.n.toLowerCase().includes(q)||a.ci.toLowerCase().includes(q)).slice(0,5);
+let h='';
+if(aa.length){h+=`<div style="padding:10px 16px;font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.5px">AIRPORTS</div>`;aa.forEach(a=>{h+=`<div class="fc" onclick="showAP(AP.find(x=>x.c==='${a.c}'));closeSearch()"><div style="width:10px;height:10px;border-radius:50%;background:var(--bl)"></div><span class="mono" style="color:var(--bl);font-size:14px;font-weight:500">${a.c}</span><span style="color:var(--t2);font-size:12px;margin-left:8px">${a.n}</span></div>`;});}
+if(af.length){h+=`<div style="padding:10px 16px;font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.5px">FLIGHTS</div>`;af.forEach(f=>{h+=`<div class="fc" onclick="selF(fl.find(x=>x.id==='${f.id}'));closeSearch()"><div style="width:6px;height:6px;border-radius:50%;background:${f.al.cl}"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:13px;font-weight:500">${f.id}</span><span class="mono" style="font-size:10px;color:var(--t3)">FL${~~(f.alt/100)}</span></div><div style="font-size:11px;color:var(--t2)">${f.o.c} → ${f.d.c} · ${f.al.n}</div></div></div>`;});}
+sr.innerHTML=h||`<div style="padding:40px;text-align:center;color:var(--t3)">No results</div>`;});
 
-// ATC
-const AT=[{ty:'tower',g:cs=>`${cs}, runway ${R(['28L','09R','25L','33L'])} cleared for takeoff, wind ${R(['270','360','180'])} at ${5+~~(Math.random()*18)}`},{ty:'tower',g:cs=>`${cs}, cleared to land runway ${R(['28L','09R','25L'])}, wind ${R(['calm','270 at 8','180 at 6'])}`},{ty:'approach',g:cs=>`${cs}, descend maintain FL${~~(Math.random()*15+18)*10}, expect ILS ${R(['25L','28R','09L'])}`},{ty:'approach',g:cs=>`${cs}, turn ${R(['left','right'])} heading ${(~~(Math.random()*36)+1)*10}, vectors ${R(['25L','28R'])}`},{ty:'ground',g:cs=>`${cs}, taxi runway ${R(['28L','04R','09L'])} via ${R(['Alpha Bravo Charlie','Kilo Lima','Echo Foxtrot Golf'])}`},{ty:'center',g:cs=>`${cs}, contact ${R(['New York','Atlanta','Chicago','Denver','Houston'])} Center ${124+~~(Math.random()*10)}.${(~~(Math.random()*40)*25).toString().padStart(3,'0')}`},{ty:'departure',g:cs=>`${cs}, radar contact, climb FL${~~(Math.random()*10+28)*10}, heading ${(~~(Math.random()*36)+1)*10}`}];
-setInterval(()=>{const t=R(AT),al=R(AL),cs=`${al.l}${100+~~(Math.random()*900)}`,n=new Date(),tm=`${n.getUTCHours().toString().padStart(2,'0')}:${n.getUTCMinutes().toString().padStart(2,'0')}:${n.getUTCSeconds().toString().padStart(2,'0')}`;am.push({ty:t.ty,cs,t:tm,msg:t.g(cs)});if(am.length>80)am=am.slice(-80);const af=document.getElementById('af');if(af){const TC={tower:'#ff3b4f',approach:'#3b82f6',ground:'#f0a030',center:'#a78bfa',departure:'#ec4899'};af.innerHTML+=`<div class="am" style="border-color:${TC[t.ty]}"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:${TC[t.ty]}15;color:${TC[t.ty]}">${t.ty}</span><span class="m" style="color:var(--a);font-weight:500;font-size:11px">${cs}</span></div><span class="m" style="color:var(--t3);font-size:9px">${tm}Z</span></div><div class="m" style="color:var(--t2);font-size:10px;line-height:1.5">${t.g(cs)}</div></div>`;af.scrollTop=af.scrollHeight;}},2500);
+const AT=[{ty:'tower',g:cs=>`${cs}, runway ${P(['28L','09R','25L','33L','04R'])} cleared for takeoff, wind ${P(['270','360','180','090'])} at ${5+~~(Math.random()*18)}`},{ty:'tower',g:cs=>`${cs}, cleared to land runway ${P(['28L','09R','25L'])}, wind ${P(['calm','270 at 8','180 at 6','360 at 12'])}`},{ty:'approach',g:cs=>`${cs}, descend and maintain FL${~~(Math.random()*15+18)*10}, expect ILS runway ${P(['25L','28R','09L'])}`},{ty:'approach',g:cs=>`${cs}, turn ${P(['left','right'])} heading ${(~~(Math.random()*36)+1)*10}, vectors ILS ${P(['25L','28R','09L'])}`},{ty:'ground',g:cs=>`${cs}, taxi to runway ${P(['28L','04R','09L'])} via ${P(['Alpha, Bravo, Charlie','Kilo, Lima','Echo, Foxtrot, Golf','Mike, November'])}`},{ty:'center',g:cs=>`${cs}, contact ${P(['New York','Atlanta','Chicago','Denver','Houston','Seattle'])} Center on ${124+~~(Math.random()*10)}.${(~~(Math.random()*40)*25).toString().padStart(3,'0')}`},{ty:'departure',g:cs=>`${cs}, radar contact, climb and maintain FL${~~(Math.random()*10+28)*10}, turn ${P(['left','right'])} heading ${(~~(Math.random()*36)+1)*10}`}];
+setInterval(()=>{const t=P(AT),al=P(AL),cs=`${al.l}${100+~~(Math.random()*900)}`,n=new Date(),tm=`${n.getUTCHours().toString().padStart(2,'0')}:${n.getUTCMinutes().toString().padStart(2,'0')}:${n.getUTCSeconds().toString().padStart(2,'0')}`;am.push({ty:t.ty,cs,t:tm,msg:t.g(cs)});if(am.length>80)am=am.slice(-80);const af=document.getElementById('af');if(af){const TC={tower:'#ff4058',approach:'#4494f8',ground:'#eda630',center:'#a78bfa',departure:'#ec4899'};af.innerHTML+=`<div class="am" style="border-color:${TC[t.ty]}"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:${TC[t.ty]}18;color:${TC[t.ty]};font-size:9px">${t.ty}</span><span class="mono" style="color:var(--a);font-weight:500;font-size:11px">${cs}</span></div><span class="mono" style="color:var(--t3);font-size:9px">${tm}Z</span></div><div class="mono" style="color:var(--t2);font-size:10px;line-height:1.5">${t.g(cs)}</div></div>`;af.scrollTop=af.scrollHeight;}},2500);
 
-// Updates
 setInterval(()=>{const n=new Date();document.getElementById('clock').textContent=n.getUTCHours().toString().padStart(2,'0')+':'+n.getUTCMinutes().toString().padStart(2,'0')+'Z';},1000);
-setInterval(()=>{fl.forEach(f=>{f.la=Math.max(-75,Math.min(75,f.la+(Math.random()-.48)*.02));f.ln=((f.ln+(Math.random()-.48)*.03+180)%360)-180;f.alt=Math.max(5000,Math.min(45000,f.alt+~~((Math.random()-.5)*60)));f.sp=Math.max(250,Math.min(580,f.sp+~~((Math.random()-.5)*3)));f.hd=(f.hd+~~((Math.random()-.5)*2)+360)%360;});render();},5000);
+setInterval(()=>{fl.forEach(f=>{f.la=Math.max(-72,Math.min(72,f.la+(Math.random()-.48)*.018));f.ln=((f.ln+(Math.random()-.48)*.025+180)%360)-180;f.alt=Math.max(5000,Math.min(42000,f.alt+~~((Math.random()-.5)*50)));f.spd=Math.max(200,Math.min(580,f.spd+~~((Math.random()-.5)*3)));f.hd=(f.hd+~~((Math.random()-.5)*2)+360)%360;});render();},5000);
 
-// Panel swipe dismiss
 let py=0;document.getElementById('panel').addEventListener('touchstart',e=>{py=e.touches[0].clientY},{passive:true});
 document.getElementById('panel').addEventListener('touchmove',e=>{if(e.touches[0].clientY-py>50)cp()},{passive:true});
 
