@@ -465,25 +465,34 @@ function getVisibleFlights(){
 function initGlobe3d(){
   const container=document.getElementById('map3d');
   if(!container||globe3d)return;
-  // Pre-create airplane textures using canvas for Three.js sprites
-  const mkTex=(color,glow)=>{
-    const c=document.createElement('canvas');c.width=64;c.height=64;
+  // High-res airplane textures for Three.js sprites
+  const mkTex=(color,glow,outline)=>{
+    const sz=256;const c=document.createElement('canvas');c.width=sz;c.height=sz;
     const x=c.getContext('2d');
-    x.clearRect(0,0,64,64);
-    if(glow){x.shadowColor=glow;x.shadowBlur=8;}
-    x.fillStyle=color;
-    x.translate(32,32);
+    x.clearRect(0,0,sz,sz);
+    x.translate(sz/2,sz/2);
+    const s=sz/64;
+    // Outer glow
+    if(glow){x.shadowColor=glow;x.shadowBlur=20*s;x.shadowOffsetX=0;x.shadowOffsetY=0;}
+    // Airplane silhouette - large and detailed
     x.beginPath();
-    x.moveTo(0,-22);x.lineTo(5,-10);x.lineTo(22,2);x.lineTo(22,7);
-    x.lineTo(5,0);x.lineTo(3,14);x.lineTo(10,19);x.lineTo(10,22);
-    x.lineTo(0,18);x.lineTo(-10,22);x.lineTo(-10,19);x.lineTo(-3,14);
-    x.lineTo(-5,0);x.lineTo(-22,7);x.lineTo(-22,2);x.lineTo(-5,-10);
-    x.closePath();x.fill();
+    x.moveTo(0,-26*s);x.lineTo(4*s,-16*s);x.lineTo(5*s,-10*s);x.lineTo(24*s,2*s);x.lineTo(24*s,6*s);
+    x.lineTo(5*s,0);x.lineTo(3*s,14*s);x.lineTo(11*s,20*s);x.lineTo(11*s,23*s);
+    x.lineTo(0,19*s);x.lineTo(-11*s,23*s);x.lineTo(-11*s,20*s);x.lineTo(-3*s,14*s);
+    x.lineTo(-5*s,0);x.lineTo(-24*s,6*s);x.lineTo(-24*s,2*s);x.lineTo(-5*s,-10*s);x.lineTo(-4*s,-16*s);
+    x.closePath();
+    // Fill with slight gradient
+    const grad=x.createLinearGradient(0,-26*s,0,23*s);
+    grad.addColorStop(0,color);grad.addColorStop(1,outline||color);
+    x.fillStyle=grad;x.fill();
+    // Subtle stroke for definition
+    x.shadowBlur=0;
+    x.strokeStyle=outline||'rgba(255,255,255,0.3)';x.lineWidth=0.8*s;x.stroke();
     return new THREE.CanvasTexture(c);
   };
-  const texNorm=mkTex('#dceeff','rgba(180,220,255,0.6)');
-  const texSel=mkTex('#5cc8f0','rgba(92,200,240,0.8)');
-  const texEm=mkTex('#ff4058','rgba(255,64,88,0.8)');
+  const texNorm=mkTex('rgba(230,245,255,0.95)','rgba(180,220,255,0.7)','rgba(140,200,255,0.5)');
+  const texSel=mkTex('#5cc8f0','rgba(92,200,240,0.9)','rgba(59,184,232,0.6)');
+  const texEm=mkTex('#ff4058','rgba(255,64,88,0.9)','rgba(200,40,60,0.6)');
 
   globe3d=Globe()
     .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
@@ -500,8 +509,18 @@ function initGlobe3d(){
     .pointLng('ln')
     .pointAltitude(0)
     .pointColor(()=>'#5cc8f0')
-    .pointRadius(0.15)
+    .pointRadius(0.25)
     .pointResolution(12)
+    // Airport labels
+    .labelsData(AP.filter(a=>['KJFK','KLAX','KORD','KATL','KDFW','KSFO','KMIA','KDEN','EGLL','LFPG','EDDF','RJTT','OMDB','WSSS','YSSY','VHHH'].includes(a.c)))
+    .labelLat('la')
+    .labelLng('ln')
+    .labelText('c')
+    .labelSize(0.6)
+    .labelDotRadius(0)
+    .labelColor(()=>'rgba(92,200,240,0.9)')
+    .labelResolution(2)
+    .labelAltitude(0.005)
     // Flight markers as 3D sprites
     .customLayerData(getVisibleFlights())
     .customThreeObject(d=>{
@@ -510,7 +529,7 @@ function initGlobe3d(){
       const tex=em?texEm:sel?texSel:texNorm;
       const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
       const sprite=new THREE.Sprite(mat);
-      const s=sel?1.2:0.6;
+      const s=sel?4.5:em?3.5:2.5;
       sprite.scale.set(s,s,1);
       sprite.renderOrder=em?10:sel?5:1;
       // Store heading for rotation
@@ -521,7 +540,7 @@ function initGlobe3d(){
       Object.assign(obj.position,globe3d.getCoords(d.la,d.ln,d.alt*0.3048/6371000));
       const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
       const sel=sf?.id===d.id;
-      const s=sel?1.2:0.6;
+      const s=sel?4.5:em?3.5:2.5;
       obj.scale.set(s,s,1);
       obj.material.map=em?texEm:sel?texSel:texNorm;
       obj.material.rotation=-(d.hd*Math.PI/180);
@@ -536,21 +555,27 @@ function initGlobe3d(){
     .arcStroke(0.8)
     (container);
 
-  // Premium intro animation: cinematic spin then smooth sweep to USA
+  // Premium cinematic intro: gentle spin → sweep → snap to USA
   globe3d.controls().enableDamping=true;
-  globe3d.controls().dampingFactor=0.12;
+  globe3d.controls().dampingFactor=0.08;
   globe3d.controls().autoRotate=true;
-  globe3d.controls().autoRotateSpeed=4;
-  // Phase 1: fast dramatic spin (0-2s)
+  globe3d.controls().autoRotateSpeed=3.0;
+  // Phase 1: elegant spin from far away (0–2.5s)
   setTimeout(()=>{
-    globe3d.controls().autoRotateSpeed=1.5;
-    globe3d.pointOfView({lat:36,lng:-95,altitude:2.4},3000);
-  },2000);
-  // Phase 2: smooth decelerate and zoom to USA (5s)
+    // Slow the spin and begin moving toward North America
+    globe3d.controls().autoRotateSpeed=1.0;
+    globe3d.pointOfView({lat:32,lng:-60,altitude:2.8},2500);
+  },2500);
+  // Phase 2: sweep across Atlantic toward US (2.5–5s)
+  setTimeout(()=>{
+    globe3d.controls().autoRotateSpeed=0.3;
+    globe3d.pointOfView({lat:36,lng:-90,altitude:2.0},2500);
+  },5000);
+  // Phase 3: final snap zoom to continental US (5–7.5s)
   setTimeout(()=>{
     globe3d.controls().autoRotate=false;
-    globe3d.pointOfView({lat:38,lng:-98,altitude:1.6},2000);
-  },5000);
+    globe3d.pointOfView({lat:39,lng:-98,altitude:1.4},2500);
+  },7500);
   window.addEventListener('resize',()=>{if(globe3d&&currentBase==='3d')globe3d.width(window.innerWidth).height(window.innerHeight);});
 }
 
