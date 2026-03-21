@@ -55,8 +55,8 @@ gmp-map-3d{width:100%;height:100%}
 </style>
 </head>
 <body>
-<div id="map"></div>
-<div id="map3d" style="position:fixed;inset:0;z-index:0;display:none">
+<div id="map" style="display:none"></div>
+<div id="map3d" style="position:fixed;inset:0;z-index:0;display:block">
   <gmp-map-3d id="gmap3d" mode="hybrid" center="40.64,-73.78" tilt="60" range="5000000" heading="0" style="width:100%;height:100%"></gmp-map-3d>
 </div>
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4zUAl2Ox3sqe2w7izi_OkFT6C-P3yBhU&v=beta&libraries=maps3d"></script>
@@ -75,10 +75,10 @@ gmp-map-3d{width:100%;height:100%}
   </div>
 
   <div class="section-title">Base Map</div>
-  <div class="layer-row" onclick="setBaseMap('dark')"><div class="toggle on" id="tg-dark"></div><div><div style="font-size:13px;color:#fff">Dark</div><div style="font-size:10px;color:var(--t3)">Default dark theme</div></div></div>
+  <div class="layer-row" onclick="setBaseMap('dark')"><div class="toggle" id="tg-dark"></div><div><div style="font-size:13px;color:#fff">Dark</div><div style="font-size:10px;color:var(--t3)">Default dark theme</div></div></div>
   <div class="layer-row" onclick="setBaseMap('satellite')"><div class="toggle" id="tg-sat"></div><div><div style="font-size:13px;color:#fff">Satellite</div><div style="font-size:10px;color:var(--t3)">Satellite imagery</div></div></div>
   <div class="layer-row" onclick="setBaseMap('terrain')"><div class="toggle" id="tg-ter"></div><div><div style="font-size:13px;color:#fff">Terrain</div><div style="font-size:10px;color:var(--t3)">Topographic view</div></div></div>
-  <div class="layer-row" onclick="setBaseMap('3d')"><div class="toggle" id="tg-3d"></div><div><div style="font-size:13px;color:#fff">🌍 Google 3D</div><div style="font-size:10px;color:var(--a)">Photorealistic 3D Earth</div></div></div>
+  <div class="layer-row" onclick="setBaseMap('3d')"><div class="toggle on" id="tg-3d"></div><div><div style="font-size:13px;color:#fff">🌍 Google 3D</div><div style="font-size:10px;color:var(--a)">Photorealistic 3D Earth</div></div></div>
 
   <div class="section-title">Overlays</div>
   <div class="layer-row" onclick="toggleOverlay('radar')"><div class="toggle on" id="tg-radar"></div><div><div style="font-size:13px;color:#fff">Weather Radar</div><div style="font-size:10px;color:var(--t3)">Live precipitation data</div></div></div>
@@ -349,7 +349,7 @@ window.listenATC=function(mount,icao){
 };
 
 // === LAYERS & FILTERS ===
-let currentBase='dark';
+let currentBase='3d';
 const baseLayers={
   dark:L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd'}),
   satellite:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{}),
@@ -457,6 +457,86 @@ function initFilters(){
 
 initFilters();
 render();
+
+// 3D Map airplane markers
+const markers3d={};
+let gmap3dReady=false;
+
+function render3d(){
+  if(currentBase!=='3d')return;
+  const g=document.getElementById('gmap3d');
+  if(!g)return;
+
+  fl.forEach(f=>{
+    const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500';
+    const sel=sf?.id===f.id;
+    const color=em?'#ff4058':sel?'#5cc8f0':'#dceeff';
+    const sz=sel?28:18;
+    const glow=em?'drop-shadow(0 0 6px rgba(255,64,88,.8))':sel?'drop-shadow(0 0 6px rgba(92,200,240,.8))':'drop-shadow(0 0 3px rgba(180,220,255,.5))';
+
+    // Check if filtered out
+    const visible=f.alt>=filterAltMin&&f.alt<=filterAltMax&&f.spd>=filterSpdMin&&f.spd<=filterSpdMax&&(filterAirline==='all'||f.al.l===filterAirline)&&(filterAcType==='all'||f.ac.c===filterAcType);
+
+    if(markers3d[f.id]){
+      if(!visible){markers3d[f.id].style.display='none';return;}
+      markers3d[f.id].style.display='';
+      markers3d[f.id].setAttribute('position',`${f.la},${f.ln}`);
+      markers3d[f.id].setAttribute('altitude',`${f.alt*0.3048}`);
+      markers3d[f.id].setAttribute('altitude-mode','absolute');
+      const svg=markers3d[f.id].querySelector('svg');
+      if(svg){
+        svg.parentElement.style.width=sz+'px';
+        svg.parentElement.style.height=sz+'px';
+        svg.parentElement.style.transform=`rotate(${f.hd}deg)`;
+        svg.parentElement.style.filter=glow;
+        svg.setAttribute('width',sz);
+        svg.setAttribute('height',sz);
+        svg.querySelector('path').setAttribute('fill',color);
+      }
+    }else{
+      if(!visible)return;
+      const marker=document.createElement('gmp-marker-3d');
+      marker.setAttribute('position',`${f.la},${f.ln}`);
+      marker.setAttribute('altitude',`${f.alt*0.3048}`);
+      marker.setAttribute('altitude-mode','absolute');
+      marker.setAttribute('extruded','');
+      marker.setAttribute('draws-when-occluded','');
+      marker.setAttribute('size-preserved','');
+      marker.setAttribute('collision-behavior','OPTIONAL_AND_HIDES_LOWER_PRIORITY');
+
+      const tpl=document.createElement('template');
+      tpl.setAttribute('slot','default');
+      tpl.innerHTML=`<div style="width:${sz}px;height:${sz}px;transform:rotate(${f.hd}deg);filter:${glow};cursor:pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${sz}" height="${sz}">
+          <path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="${color}"/>
+        </svg>
+      </div>`;
+      marker.appendChild(tpl);
+      marker.addEventListener('click',()=>selF(f));
+      g.appendChild(marker);
+      markers3d[f.id]=marker;
+    }
+  });
+}
+
+// Wait for Google Maps 3D to load then render
+customElements.whenDefined('gmp-map-3d').then(()=>{
+  gmap3dReady=true;
+  render3d();
+});
+
+// Patch the existing render to also update 3D
+const origRender=render;
+const patchedRender=function(){origRender();render3d();};
+// Replace render in the update interval
+setInterval(()=>{render3d();},5100);
+
+// Also re-render 3D when switching to 3D mode
+const origSetBaseMap=setBaseMap;
+setBaseMap=function(type){
+  origSetBaseMap(type);
+  if(type==='3d'){setTimeout(render3d,200);}
+};
 </script>
 </body>
 </html>
