@@ -473,18 +473,24 @@ function initGlobe3d(){
     .width(window.innerWidth)
     .height(window.innerHeight)
     .pointOfView({lat:10,lng:60,altitude:3.5})
-    .pointsData(getVisibleFlights())
-    .pointLat('la')
-    .pointLng('ln')
-    .pointAltitude(d=>d.alt*0.3048/6371000)
-    .pointColor(d=>{
+    // Airplane markers as HTML elements
+    .htmlElementsData(getVisibleFlights())
+    .htmlLat('la')
+    .htmlLng('ln')
+    .htmlAltitude(d=>d.alt*0.3048/6371000)
+    .htmlElement(d=>{
       const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
       const sel=sf?.id===d.id;
-      return em?'#ff4058':sel?'#5cc8f0':'rgba(220,238,255,0.95)';
+      const color=em?'#ff4058':sel?'#5cc8f0':'#dceeff';
+      const sz=sel?22:14;
+      const glow=em?'drop-shadow(0 0 4px rgba(255,64,88,.8))':sel?'drop-shadow(0 0 4px rgba(92,200,240,.8))':'drop-shadow(0 0 2px rgba(180,220,255,.6))';
+      const el=document.createElement('div');
+      el.style.cssText=`width:${sz}px;height:${sz}px;transform:rotate(${d.hd}deg);filter:${glow};cursor:pointer;pointer-events:auto;`;
+      el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${sz}" height="${sz}"><path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="${color}"/></svg>`;
+      el.onclick=()=>selF(d);
+      return el;
     })
-    .pointRadius(d=>{const sel=sf?.id===d.id;return sel?0.25:0.12;})
-    .pointResolution(12)
-    .onPointClick(d=>selF(d))
+    // Route arc for selected flight
     .arcsData([])
     .arcColor(()=>['#3bb8e8','#5cc8f0'])
     .arcDashLength(0.4)
@@ -492,24 +498,23 @@ function initGlobe3d(){
     .arcDashAnimateTime(1500)
     .arcStroke(0.6)
     (container);
-  // Intro animation: spin from far away then snap zoom to USA
+  // Intro animation: fast spin then sweep and snap-zoom to USA
   globe3d.controls().autoRotate=true;
-  globe3d.controls().autoRotateSpeed=2.5;
+  globe3d.controls().autoRotateSpeed=3;
   setTimeout(()=>{
-    globe3d.controls().autoRotateSpeed=1.2;
-    globe3d.pointOfView({lat:38,lng:-98,altitude:2.2},2000);
-  },1500);
+    globe3d.controls().autoRotateSpeed=1;
+    globe3d.pointOfView({lat:38,lng:-98,altitude:2.2},2500);
+  },1800);
   setTimeout(()=>{
     globe3d.controls().autoRotate=false;
-    globe3d.pointOfView({lat:38,lng:-98,altitude:1.8},1200);
-  },3500);
+    globe3d.pointOfView({lat:38,lng:-98,altitude:1.7},1500);
+  },4300);
   window.addEventListener('resize',()=>{if(globe3d&&currentBase==='3d')globe3d.width(window.innerWidth).height(window.innerHeight);});
 }
 
 function render3d(){
   if(currentBase!=='3d'||!globe3d)return;
-  const visible=getVisibleFlights();
-  globe3d.pointsData(visible);
+  globe3d.htmlElementsData(getVisibleFlights());
   if(sf){
     globe3d.arcsData([{startLat:sf.o.la,startLng:sf.o.ln,endLat:sf.d.la,endLng:sf.d.ln}]);
   }else{
