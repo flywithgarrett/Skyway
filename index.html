@@ -464,6 +464,26 @@ function getVisibleFlights(){
 function initGlobe3d(){
   const container=document.getElementById('map3d');
   if(!container||globe3d)return;
+  // Pre-create airplane textures using canvas for Three.js sprites
+  const mkTex=(color,glow)=>{
+    const c=document.createElement('canvas');c.width=64;c.height=64;
+    const x=c.getContext('2d');
+    x.clearRect(0,0,64,64);
+    if(glow){x.shadowColor=glow;x.shadowBlur=8;}
+    x.fillStyle=color;
+    x.translate(32,32);
+    x.beginPath();
+    x.moveTo(0,-22);x.lineTo(5,-10);x.lineTo(22,2);x.lineTo(22,7);
+    x.lineTo(5,0);x.lineTo(3,14);x.lineTo(10,19);x.lineTo(10,22);
+    x.lineTo(0,18);x.lineTo(-10,22);x.lineTo(-10,19);x.lineTo(-3,14);
+    x.lineTo(-5,0);x.lineTo(-22,7);x.lineTo(-22,2);x.lineTo(-5,-10);
+    x.closePath();x.fill();
+    return new THREE.CanvasTexture(c);
+  };
+  const texNorm=mkTex('#dceeff','rgba(180,220,255,0.6)');
+  const texSel=mkTex('#5cc8f0','rgba(92,200,240,0.8)');
+  const texEm=mkTex('#ff4058','rgba(255,64,88,0.8)');
+
   globe3d=Globe()
     .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
     .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
@@ -472,23 +492,39 @@ function initGlobe3d(){
     .atmosphereAltitude(0.18)
     .width(window.innerWidth)
     .height(window.innerHeight)
-    .pointOfView({lat:10,lng:60,altitude:3.5})
-    // Airplane markers as HTML elements
-    .htmlElementsData(getVisibleFlights())
-    .htmlLat('la')
-    .htmlLng('ln')
-    .htmlAltitude(d=>d.alt*0.3048/6371000)
-    .htmlElement(d=>{
+    .pointOfView({lat:20,lng:80,altitude:3.5})
+    // Airport markers
+    .pointsData(AP)
+    .pointLat('la')
+    .pointLng('ln')
+    .pointAltitude(0)
+    .pointColor(()=>'#5cc8f0')
+    .pointRadius(0.15)
+    .pointResolution(12)
+    // Flight markers as 3D sprites
+    .customLayerData(getVisibleFlights())
+    .customThreeObject(d=>{
       const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
       const sel=sf?.id===d.id;
-      const color=em?'#ff4058':sel?'#5cc8f0':'#dceeff';
-      const sz=sel?22:14;
-      const glow=em?'drop-shadow(0 0 4px rgba(255,64,88,.8))':sel?'drop-shadow(0 0 4px rgba(92,200,240,.8))':'drop-shadow(0 0 2px rgba(180,220,255,.6))';
-      const el=document.createElement('div');
-      el.style.cssText=`width:${sz}px;height:${sz}px;transform:rotate(${d.hd}deg);filter:${glow};cursor:pointer;pointer-events:auto;`;
-      el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${sz}" height="${sz}"><path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="${color}"/></svg>`;
-      el.onclick=()=>selF(d);
-      return el;
+      const tex=em?texEm:sel?texSel:texNorm;
+      const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+      const sprite=new THREE.Sprite(mat);
+      const s=sel?1.2:0.6;
+      sprite.scale.set(s,s,1);
+      sprite.renderOrder=em?10:sel?5:1;
+      // Store heading for rotation
+      sprite.material.rotation=-(d.hd*Math.PI/180);
+      return sprite;
+    })
+    .customThreeObjectUpdate((obj,d)=>{
+      Object.assign(obj.position,globe3d.getCoords(d.la,d.ln,d.alt*0.3048/6371000));
+      const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
+      const sel=sf?.id===d.id;
+      const s=sel?1.2:0.6;
+      obj.scale.set(s,s,1);
+      obj.material.map=em?texEm:sel?texSel:texNorm;
+      obj.material.rotation=-(d.hd*Math.PI/180);
+      obj.material.needsUpdate=true;
     })
     // Route arc for selected flight
     .arcsData([])
@@ -496,25 +532,30 @@ function initGlobe3d(){
     .arcDashLength(0.4)
     .arcDashGap(0.2)
     .arcDashAnimateTime(1500)
-    .arcStroke(0.6)
+    .arcStroke(0.8)
     (container);
-  // Intro animation: fast spin then sweep and snap-zoom to USA
+
+  // Premium intro animation: cinematic spin then smooth sweep to USA
+  globe3d.controls().enableDamping=true;
+  globe3d.controls().dampingFactor=0.12;
   globe3d.controls().autoRotate=true;
-  globe3d.controls().autoRotateSpeed=3;
+  globe3d.controls().autoRotateSpeed=4;
+  // Phase 1: fast dramatic spin (0-2s)
   setTimeout(()=>{
-    globe3d.controls().autoRotateSpeed=1;
-    globe3d.pointOfView({lat:38,lng:-98,altitude:2.2},2500);
-  },1800);
+    globe3d.controls().autoRotateSpeed=1.5;
+    globe3d.pointOfView({lat:36,lng:-95,altitude:2.4},3000);
+  },2000);
+  // Phase 2: smooth decelerate and zoom to USA (5s)
   setTimeout(()=>{
     globe3d.controls().autoRotate=false;
-    globe3d.pointOfView({lat:38,lng:-98,altitude:1.7},1500);
-  },4300);
+    globe3d.pointOfView({lat:38,lng:-98,altitude:1.6},2000);
+  },5000);
   window.addEventListener('resize',()=>{if(globe3d&&currentBase==='3d')globe3d.width(window.innerWidth).height(window.innerHeight);});
 }
 
 function render3d(){
   if(currentBase!=='3d'||!globe3d)return;
-  globe3d.htmlElementsData(getVisibleFlights());
+  globe3d.customLayerData(getVisibleFlights());
   if(sf){
     globe3d.arcsData([{startLat:sf.o.la,startLng:sf.o.ln,endLat:sf.d.la,endLng:sf.d.ln}]);
   }else{
