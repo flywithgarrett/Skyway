@@ -465,14 +465,14 @@ function initGlobe3d(){
   const container=document.getElementById('map3d');
   if(!container||globe3d)return;
   globe3d=Globe()
-    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+    .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
+    .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+    .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
     .atmosphereColor('#3bb8e8')
     .atmosphereAltitude(0.18)
     .width(window.innerWidth)
     .height(window.innerHeight)
-    .pointOfView({lat:30,lng:-20,altitude:2.5})
+    .pointOfView({lat:10,lng:60,altitude:3.5})
     .pointsData(getVisibleFlights())
     .pointLat('la')
     .pointLng('ln')
@@ -480,10 +480,10 @@ function initGlobe3d(){
     .pointColor(d=>{
       const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
       const sel=sf?.id===d.id;
-      return em?'#ff4058':sel?'#5cc8f0':'rgba(220,238,255,0.9)';
+      return em?'#ff4058':sel?'#5cc8f0':'rgba(220,238,255,0.95)';
     })
-    .pointRadius(d=>{const sel=sf?.id===d.id;return sel?0.14:0.045;})
-    .pointResolution(8)
+    .pointRadius(d=>{const sel=sf?.id===d.id;return sel?0.25:0.12;})
+    .pointResolution(12)
     .onPointClick(d=>selF(d))
     .arcsData([])
     .arcColor(()=>['#3bb8e8','#5cc8f0'])
@@ -492,8 +492,17 @@ function initGlobe3d(){
     .arcDashAnimateTime(1500)
     .arcStroke(0.6)
     (container);
+  // Intro animation: spin from far away then snap zoom to USA
   globe3d.controls().autoRotate=true;
-  globe3d.controls().autoRotateSpeed=0.3;
+  globe3d.controls().autoRotateSpeed=2.5;
+  setTimeout(()=>{
+    globe3d.controls().autoRotateSpeed=1.2;
+    globe3d.pointOfView({lat:38,lng:-98,altitude:2.2},2000);
+  },1500);
+  setTimeout(()=>{
+    globe3d.controls().autoRotate=false;
+    globe3d.pointOfView({lat:38,lng:-98,altitude:1.8},1200);
+  },3500);
   window.addEventListener('resize',()=>{if(globe3d&&currentBase==='3d')globe3d.width(window.innerWidth).height(window.innerHeight);});
 }
 
