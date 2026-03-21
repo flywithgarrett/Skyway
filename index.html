@@ -17,7 +17,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
 #map{position:fixed;inset:0;z-index:0}
 #map3d{position:fixed;inset:0;z-index:0}
-gmp-map-3d{width:100%;height:100%}
 .leaflet-container{background:#060e1e!important}
 .leaflet-control-zoom,.leaflet-control-attribution{display:none!important}
 .leaflet-popup-content-wrapper{background:rgba(18,28,48,.94)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1)!important;border-radius:16px!important;box-shadow:0 12px 40px rgba(0,0,0,.6)!important;color:#fff!important;padding:0!important}
@@ -76,7 +75,7 @@ gmp-map-3d{width:100%;height:100%}
   <div class="layer-row" onclick="setBaseMap('dark')"><div class="toggle" id="tg-dark"></div><div><div style="font-size:13px;color:#fff">Dark</div><div style="font-size:10px;color:var(--t3)">Default dark theme</div></div></div>
   <div class="layer-row" onclick="setBaseMap('satellite')"><div class="toggle" id="tg-sat"></div><div><div style="font-size:13px;color:#fff">Satellite</div><div style="font-size:10px;color:var(--t3)">Satellite imagery</div></div></div>
   <div class="layer-row" onclick="setBaseMap('terrain')"><div class="toggle" id="tg-ter"></div><div><div style="font-size:13px;color:#fff">Terrain</div><div style="font-size:10px;color:var(--t3)">Topographic view</div></div></div>
-  <div class="layer-row" onclick="setBaseMap('3d')"><div class="toggle on" id="tg-3d"></div><div><div style="font-size:13px;color:#fff">🌍 Google 3D</div><div style="font-size:10px;color:var(--a)">Photorealistic 3D Earth</div></div></div>
+  <div class="layer-row" onclick="setBaseMap('3d')"><div class="toggle on" id="tg-3d"></div><div><div style="font-size:13px;color:#fff">3D Globe</div><div style="font-size:10px;color:var(--a)">Interactive 3D Earth</div></div></div>
 
   <div class="section-title">Overlays</div>
   <div class="layer-row" onclick="toggleOverlay('radar')"><div class="toggle on" id="tg-radar"></div><div><div style="font-size:13px;color:#fff">Weather Radar</div><div style="font-size:10px;color:var(--t3)">Live precipitation data</div></div></div>
