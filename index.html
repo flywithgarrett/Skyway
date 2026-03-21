@@ -16,6 +16,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .mono{font-family:'JetBrains Mono',monospace}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
 #map{position:fixed;inset:0;z-index:0}
+#map3d{position:fixed;inset:0;z-index:0}
+gmp-map-3d{width:100%;height:100%}
 .leaflet-container{background:#060e1e!important}
 .leaflet-control-zoom,.leaflet-control-attribution{display:none!important}
 .leaflet-popup-content-wrapper{background:rgba(18,28,48,.94)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1)!important;border-radius:16px!important;box-shadow:0 12px 40px rgba(0,0,0,.6)!important;color:#fff!important;padding:0!important}
@@ -54,6 +56,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 </head>
 <body>
 <div id="map"></div>
+<div id="map3d" style="position:fixed;inset:0;z-index:0;display:none">
+  <gmp-map-3d id="gmap3d" mode="hybrid" center="40.64,-73.78" tilt="60" range="5000000" heading="0" style="width:100%;height:100%"></gmp-map-3d>
+</div>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4zUAl2Ox3sqe2w7izi_OkFT6C-P3yBhU&v=beta&libraries=maps3d"></script>
 <div id="top">
   <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#3bb8e8;box-shadow:0 0 10px rgba(59,184,232,.5)"></div><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px">SkyWay</span></div>
   <div onclick="openSearch()" style="flex:1;max-width:300px;display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer" class="glass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="font-size:13px;color:var(--t3)">Search flights, airports…</span></div>
@@ -72,6 +78,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="layer-row" onclick="setBaseMap('dark')"><div class="toggle on" id="tg-dark"></div><div><div style="font-size:13px;color:#fff">Dark</div><div style="font-size:10px;color:var(--t3)">Default dark theme</div></div></div>
   <div class="layer-row" onclick="setBaseMap('satellite')"><div class="toggle" id="tg-sat"></div><div><div style="font-size:13px;color:#fff">Satellite</div><div style="font-size:10px;color:var(--t3)">Satellite imagery</div></div></div>
   <div class="layer-row" onclick="setBaseMap('terrain')"><div class="toggle" id="tg-ter"></div><div><div style="font-size:13px;color:#fff">Terrain</div><div style="font-size:10px;color:var(--t3)">Topographic view</div></div></div>
+  <div class="layer-row" onclick="setBaseMap('3d')"><div class="toggle" id="tg-3d"></div><div><div style="font-size:13px;color:#fff">🌍 Google 3D</div><div style="font-size:10px;color:var(--a)">Photorealistic 3D Earth</div></div></div>
 
   <div class="section-title">Overlays</div>
   <div class="layer-row" onclick="toggleOverlay('radar')"><div class="toggle on" id="tg-radar"></div><div><div style="font-size:13px;color:#fff">Weather Radar</div><div style="font-size:10px;color:var(--t3)">Live precipitation data</div></div></div>
@@ -355,11 +362,27 @@ let apVisible=true;
 function toggleLayers(){document.getElementById('layers-panel').classList.toggle('open');}
 
 function setBaseMap(type){
-  Object.values(baseLayers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});
-  baseLayers[type].addTo(map);
+  const map2d=document.getElementById('map');
+  const map3d=document.getElementById('map3d');
+  if(type==='3d'){
+    // Switch to Google 3D
+    map2d.style.display='none';
+    map3d.style.display='block';
+    // Sync position from Leaflet to Google 3D
+    const c=map.getCenter();
+    const g=document.getElementById('gmap3d');
+    if(g){g.setAttribute('center',`${c.lat},${c.lng}`);g.setAttribute('range','5000000');g.setAttribute('tilt','60');}
+  }else{
+    // Switch back to 2D
+    map3d.style.display='none';
+    map2d.style.display='block';
+    Object.values(baseLayers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});
+    baseLayers[type].addTo(map);
+    map.invalidateSize();
+  }
   currentBase=type;
-  ['dark','sat','ter'].forEach(t=>{const el=document.getElementById('tg-'+t);if(el)el.classList.remove('on');});
-  const id=type==='dark'?'tg-dark':type==='satellite'?'tg-sat':'tg-ter';
+  ['dark','sat','ter','3d'].forEach(t=>{const el=document.getElementById('tg-'+t);if(el)el.classList.remove('on');});
+  const id=type==='dark'?'tg-dark':type==='satellite'?'tg-sat':type==='terrain'?'tg-ter':'tg-3d';
   document.getElementById(id)?.classList.add('on');
 }
 
