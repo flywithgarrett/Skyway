@@ -521,18 +521,15 @@ function initGlobe3d(){
     .labelColor(()=>'rgba(92,200,240,0.9)')
     .labelResolution(2)
     .labelAltitude(0.005)
-    // Flight markers as 3D sprites
+    // Flight markers as 3D sprites - scale with zoom
     .customLayerData(getVisibleFlights())
     .customThreeObject(d=>{
       const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
       const sel=sf?.id===d.id;
       const tex=em?texEm:sel?texSel:texNorm;
-      const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+      const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,sizeAttenuation:true});
       const sprite=new THREE.Sprite(mat);
-      const s=sel?4.5:em?3.5:2.5;
-      sprite.scale.set(s,s,1);
       sprite.renderOrder=em?10:sel?5:1;
-      // Store heading for rotation
       sprite.material.rotation=-(d.hd*Math.PI/180);
       return sprite;
     })
@@ -540,7 +537,10 @@ function initGlobe3d(){
       Object.assign(obj.position,globe3d.getCoords(d.la,d.ln,d.alt*0.3048/6371000));
       const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
       const sel=sf?.id===d.id;
-      const s=sel?4.5:em?3.5:2.5;
+      // Scale sprites based on camera altitude so they look consistent
+      const alt=globe3d.pointOfView().altitude;
+      const base=sel?1.2:em?1.0:0.7;
+      const s=base*Math.max(0.3,Math.min(1.8,alt*0.9));
       obj.scale.set(s,s,1);
       obj.material.map=em?texEm:sel?texSel:texNorm;
       obj.material.rotation=-(d.hd*Math.PI/180);
@@ -565,21 +565,18 @@ function initGlobe3d(){
     .arcStroke(0.8)
     (container);
 
-  // Fast cinematic intro: quick spin → snap to USA
-  globe3d.controls().enableDamping=true;
-  globe3d.controls().dampingFactor=0.15;
-  globe3d.controls().autoRotate=true;
-  globe3d.controls().autoRotateSpeed=6;
-  // Phase 1: quick spin (0–1s)
-  setTimeout(()=>{
-    globe3d.controls().autoRotateSpeed=2;
-    globe3d.pointOfView({lat:35,lng:-70,altitude:2.2},1000);
-  },1000);
-  // Phase 2: snap to USA (1–2.2s)
-  setTimeout(()=>{
-    globe3d.controls().autoRotate=false;
-    globe3d.pointOfView({lat:39,lng:-98,altitude:1.4},1200);
-  },2200);
+  // Apple-quality smooth controls
+  const ctrl=globe3d.controls();
+  ctrl.enableDamping=true;
+  ctrl.dampingFactor=0.06;
+  ctrl.rotateSpeed=0.4;
+  ctrl.zoomSpeed=0.6;
+  ctrl.minDistance=120;
+  ctrl.maxDistance=800;
+  ctrl.enablePan=false;
+  // Smooth intro: single fluid motion to USA
+  ctrl.autoRotate=false;
+  globe3d.pointOfView({lat:39,lng:-98,altitude:1.6},2800);
   window.addEventListener('resize',()=>{if(globe3d&&currentBase==='3d')globe3d.width(window.innerWidth).height(window.innerHeight);});
 }
 
