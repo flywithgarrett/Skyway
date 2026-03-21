@@ -1,0 +1,12 @@
+{
+  "name": "skyway",
+  "version": "1.0.0",
+  "description": "SkyWay — Premium global aviation intelligence platform. Live flight tracking, 3D globe, ATC audio & transcripts.",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . --cors"
+  },
+  "keywords": ["aviation", "flight-tracking", "3d-globe", "atc"],
+  "license": "MIT",
+  "private": true
+}
