@@ -56,10 +56,8 @@ gmp-map-3d{width:100%;height:100%}
 </head>
 <body>
 <div id="map" style="display:none"></div>
-<div id="map3d" style="position:fixed;inset:0;z-index:0;display:block">
-  <gmp-map-3d id="gmap3d" mode="hybrid" center="40.64,-73.78" tilt="60" range="5000000" heading="0" style="width:100%;height:100%"></gmp-map-3d>
-</div>
-<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4zUAl2Ox3sqe2w7izi_OkFT6C-P3yBhU&v=beta&libraries=maps3d"></script>
+<div id="map3d" style="position:fixed;inset:0;z-index:0;display:block"></div>
+<script src="https://unpkg.com/globe.gl@2"></script>
 <div id="top">
   <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#3bb8e8;box-shadow:0 0 10px rgba(59,184,232,.5)"></div><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px">SkyWay</span></div>
   <div onclick="openSearch()" style="flex:1;max-width:300px;display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer" class="glass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="font-size:13px;color:var(--t3)">Search flights, airports…</span></div>
@@ -365,13 +363,11 @@ function setBaseMap(type){
   const map2d=document.getElementById('map');
   const map3d=document.getElementById('map3d');
   if(type==='3d'){
-    // Switch to Google 3D
     map2d.style.display='none';
     map3d.style.display='block';
-    // Sync position from Leaflet to Google 3D
-    const c=map.getCenter();
-    const g=document.getElementById('gmap3d');
-    if(g){g.setAttribute('center',`${c.lat},${c.lng}`);g.setAttribute('range','5000000');g.setAttribute('tilt','60');}
+    if(!globe3d)initGlobe3d();
+    else{globe3d.width(window.innerWidth).height(window.innerHeight);}
+    setTimeout(render3d,100);
   }else{
     // Switch back to 2D
     map3d.style.display='none';
@@ -438,6 +434,7 @@ function applyFilters(){
     if(acM[f.id]){if(visible){if(!map.hasLayer(acM[f.id]))acM[f.id].addTo(map);shown++;}else{if(map.hasLayer(acM[f.id]))map.removeLayer(acM[f.id]);}}
   });
   document.getElementById('filter-count').textContent=`Showing ${shown} of ${fl.length} flights`;
+  render3d();
 }
 
 function resetFilters(){
@@ -458,85 +455,64 @@ function initFilters(){
 initFilters();
 render();
 
-// 3D Map airplane markers
-const markers3d={};
-let gmap3dReady=false;
+// 3D Globe using globe.gl
+let globe3d=null;
 
-function render3d(){
-  if(currentBase!=='3d')return;
-  const g=document.getElementById('gmap3d');
-  if(!g)return;
-
-  fl.forEach(f=>{
-    const em=f.sq==='7700'||f.sq==='7600'||f.sq==='7500';
-    const sel=sf?.id===f.id;
-    const color=em?'#ff4058':sel?'#5cc8f0':'#dceeff';
-    const sz=sel?28:18;
-    const glow=em?'drop-shadow(0 0 6px rgba(255,64,88,.8))':sel?'drop-shadow(0 0 6px rgba(92,200,240,.8))':'drop-shadow(0 0 3px rgba(180,220,255,.5))';
-
-    // Check if filtered out
-    const visible=f.alt>=filterAltMin&&f.alt<=filterAltMax&&f.spd>=filterSpdMin&&f.spd<=filterSpdMax&&(filterAirline==='all'||f.al.l===filterAirline)&&(filterAcType==='all'||f.ac.c===filterAcType);
-
-    if(markers3d[f.id]){
-      if(!visible){markers3d[f.id].style.display='none';return;}
-      markers3d[f.id].style.display='';
-      markers3d[f.id].setAttribute('position',`${f.la},${f.ln}`);
-      markers3d[f.id].setAttribute('altitude',`${f.alt*0.3048}`);
-      markers3d[f.id].setAttribute('altitude-mode','absolute');
-      const svg=markers3d[f.id].querySelector('svg');
-      if(svg){
-        svg.parentElement.style.width=sz+'px';
-        svg.parentElement.style.height=sz+'px';
-        svg.parentElement.style.transform=`rotate(${f.hd}deg)`;
-        svg.parentElement.style.filter=glow;
-        svg.setAttribute('width',sz);
-        svg.setAttribute('height',sz);
-        svg.querySelector('path').setAttribute('fill',color);
-      }
-    }else{
-      if(!visible)return;
-      const marker=document.createElement('gmp-marker-3d');
-      marker.setAttribute('position',`${f.la},${f.ln}`);
-      marker.setAttribute('altitude',`${f.alt*0.3048}`);
-      marker.setAttribute('altitude-mode','absolute');
-      marker.setAttribute('extruded','');
-      marker.setAttribute('draws-when-occluded','');
-      marker.setAttribute('size-preserved','');
-      marker.setAttribute('collision-behavior','OPTIONAL_AND_HIDES_LOWER_PRIORITY');
-
-      const tpl=document.createElement('template');
-      tpl.setAttribute('slot','default');
-      tpl.innerHTML=`<div style="width:${sz}px;height:${sz}px;transform:rotate(${f.hd}deg);filter:${glow};cursor:pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${sz}" height="${sz}">
-          <path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="${color}"/>
-        </svg>
-      </div>`;
-      marker.appendChild(tpl);
-      marker.addEventListener('click',()=>selF(f));
-      g.appendChild(marker);
-      markers3d[f.id]=marker;
-    }
-  });
+function getVisibleFlights(){
+  return fl.filter(f=>f.alt>=filterAltMin&&f.alt<=filterAltMax&&f.spd>=filterSpdMin&&f.spd<=filterSpdMax&&(filterAirline==='all'||f.al.l===filterAirline)&&(filterAcType==='all'||f.ac.c===filterAcType));
 }
 
-// Wait for Google Maps 3D to load then render
-customElements.whenDefined('gmp-map-3d').then(()=>{
-  gmap3dReady=true;
-  render3d();
-});
+function initGlobe3d(){
+  const container=document.getElementById('map3d');
+  if(!container||globe3d)return;
+  globe3d=Globe()
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+    .atmosphereColor('#3bb8e8')
+    .atmosphereAltitude(0.18)
+    .width(window.innerWidth)
+    .height(window.innerHeight)
+    .pointOfView({lat:30,lng:-20,altitude:2.5})
+    .pointsData(getVisibleFlights())
+    .pointLat('la')
+    .pointLng('ln')
+    .pointAltitude(d=>d.alt*0.3048/6371000)
+    .pointColor(d=>{
+      const em=d.sq==='7700'||d.sq==='7600'||d.sq==='7500';
+      const sel=sf?.id===d.id;
+      return em?'#ff4058':sel?'#5cc8f0':'rgba(220,238,255,0.9)';
+    })
+    .pointRadius(d=>{const sel=sf?.id===d.id;return sel?0.14:0.045;})
+    .pointResolution(8)
+    .onPointClick(d=>selF(d))
+    .arcsData([])
+    .arcColor(()=>['#3bb8e8','#5cc8f0'])
+    .arcDashLength(0.4)
+    .arcDashGap(0.2)
+    .arcDashAnimateTime(1500)
+    .arcStroke(0.6)
+    (container);
+  globe3d.controls().autoRotate=true;
+  globe3d.controls().autoRotateSpeed=0.3;
+  window.addEventListener('resize',()=>{if(globe3d&&currentBase==='3d')globe3d.width(window.innerWidth).height(window.innerHeight);});
+}
 
-// Patch the existing render to also update 3D
-const origRender=render;
-const patchedRender=function(){origRender();render3d();};
-// Replace render in the update interval
-setInterval(()=>{render3d();},5100);
+function render3d(){
+  if(currentBase!=='3d'||!globe3d)return;
+  const visible=getVisibleFlights();
+  globe3d.pointsData(visible);
+  if(sf){
+    globe3d.arcsData([{startLat:sf.o.la,startLng:sf.o.ln,endLat:sf.d.la,endLng:sf.d.ln}]);
+  }else{
+    globe3d.arcsData([]);
+  }
+}
 
-// Also re-render 3D when switching to 3D mode
-const origSetBaseMap=setBaseMap;
-setBaseMap=function(type){
-  origSetBaseMap(type);
-  if(type==='3d'){setTimeout(render3d,200);}
-};
+// Initialize globe immediately since 3D is default
+initGlobe3d();
+// Sync 3D with flight position updates
+setInterval(render3d,5100);
 </script>
 </body>
 </html>
