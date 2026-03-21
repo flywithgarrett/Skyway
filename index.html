@@ -38,6 +38,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .am{padding:8px 12px;margin-bottom:4px;border-radius:10px;background:rgba(0,0,0,.15);border-left:3px solid}
 .btn{display:block;text-align:center;padding:12px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:none;cursor:pointer}
 .glass{background:rgba(18,28,48,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.06);border-radius:12px}
+#layers-panel{position:fixed;top:50px;right:-320px;width:300px;max-height:80vh;z-index:800;background:rgba(10,22,40,.95);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(59,184,232,.1);border-radius:16px;transition:right .3s cubic-bezier(.32,.72,0,1);overflow-y:auto;box-shadow:-4px 0 30px rgba(0,0,0,.4)}
+#layers-panel.open{right:14px}
+.layer-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .12s}
+.layer-row:hover{background:rgba(59,184,232,.04)}
+.toggle{width:38px;height:22px;border-radius:11px;background:rgba(255,255,255,.08);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:rgba(59,184,232,.4)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .2s}
+.toggle.on::after{left:18px}
+.range-wrap{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.03)}
+.range-wrap input[type=range]{width:100%;margin:6px 0;accent-color:#3bb8e8;height:4px;-webkit-appearance:none;background:rgba(59,184,232,.15);border-radius:2px;outline:none}
+.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#3bb8e8;cursor:pointer;box-shadow:0 0 6px rgba(59,184,232,.4)}
+.section-title{font-size:11px;font-weight:600;color:var(--a);letter-spacing:.5px;padding:12px 14px 6px;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -46,6 +58,58 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#3bb8e8;box-shadow:0 0 10px rgba(59,184,232,.5)"></div><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px">SkyWay</span></div>
   <div onclick="openSearch()" style="flex:1;max-width:300px;display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer" class="glass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="font-size:13px;color:var(--t3)">Search flights, airports…</span></div>
   <div class="glass mono" style="display:flex;align-items:center;gap:6px;padding:7px 14px"><div style="width:6px;height:6px;border-radius:50%;background:#3bb8e8;box-shadow:0 0 6px rgba(59,184,232,.5)"></div><span style="font-size:11px;color:#3bb8e8;font-weight:500">LIVE</span><span id="clock" style="font-size:11px;color:var(--t2)"></span></div>
+  <button onclick="toggleLayers()" class="glass" style="display:flex;align-items:center;gap:5px;padding:7px 12px;cursor:pointer;border:1px solid rgba(59,184,232,.15);color:var(--a);font-family:Inter;font-size:11px;font-weight:500"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Layers</button>
+</div>
+
+<!-- LAYERS & FILTERS PANEL -->
+<div id="layers-panel">
+  <div style="padding:14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:15px;font-weight:600;color:#fff">Map Layers & Filters</span>
+    <button onclick="toggleLayers()" style="background:rgba(255,255,255,.06);border:none;color:var(--t2);cursor:pointer;width:28px;height:28px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+  </div>
+
+  <div class="section-title">Base Map</div>
+  <div class="layer-row" onclick="setBaseMap('dark')"><div class="toggle on" id="tg-dark"></div><div><div style="font-size:13px;color:#fff">Dark</div><div style="font-size:10px;color:var(--t3)">Default dark theme</div></div></div>
+  <div class="layer-row" onclick="setBaseMap('satellite')"><div class="toggle" id="tg-sat"></div><div><div style="font-size:13px;color:#fff">Satellite</div><div style="font-size:10px;color:var(--t3)">Satellite imagery</div></div></div>
+  <div class="layer-row" onclick="setBaseMap('terrain')"><div class="toggle" id="tg-ter"></div><div><div style="font-size:13px;color:#fff">Terrain</div><div style="font-size:10px;color:var(--t3)">Topographic view</div></div></div>
+
+  <div class="section-title">Overlays</div>
+  <div class="layer-row" onclick="toggleOverlay('radar')"><div class="toggle on" id="tg-radar"></div><div><div style="font-size:13px;color:#fff">Weather Radar</div><div style="font-size:10px;color:var(--t3)">Live precipitation data</div></div></div>
+  <div class="layer-row" onclick="toggleOverlay('clouds')"><div class="toggle" id="tg-clouds"></div><div><div style="font-size:13px;color:#fff">Cloud Cover</div><div style="font-size:10px;color:var(--t3)">Satellite cloud imagery</div></div></div>
+  <div class="layer-row" onclick="toggleOverlay('airports')"><div class="toggle on" id="tg-ap"></div><div><div style="font-size:13px;color:#fff">Airports</div><div style="font-size:10px;color:var(--t3)">Airport markers & labels</div></div></div>
+  <div class="layer-row" onclick="toggleOverlay('daynight')"><div class="toggle" id="tg-dn"></div><div><div style="font-size:13px;color:#fff">Day/Night Terminator</div><div style="font-size:10px;color:var(--t3)">Sunlit earth boundary</div></div></div>
+
+  <div class="section-title">Flight Filters</div>
+  <div class="range-wrap">
+    <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--t2)">Altitude</span><span class="mono" style="color:var(--a)" id="alt-val">0 — 65,000 ft</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="range" min="0" max="65000" value="0" step="1000" id="alt-min" oninput="applyFilters()">
+      <input type="range" min="0" max="65000" value="65000" step="1000" id="alt-max" oninput="applyFilters()">
+    </div>
+  </div>
+  <div class="range-wrap">
+    <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--t2)">Speed</span><span class="mono" style="color:var(--a)" id="spd-val">0 — 800 kts</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="range" min="0" max="800" value="0" step="10" id="spd-min" oninput="applyFilters()">
+      <input type="range" min="0" max="800" value="800" step="10" id="spd-max" oninput="applyFilters()">
+    </div>
+  </div>
+  <div class="range-wrap">
+    <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Airline</div>
+    <select id="airline-filter" onchange="applyFilters()" style="width:100%;padding:8px;background:rgba(0,0,0,.3);color:#fff;border:1px solid var(--bd);border-radius:8px;font-family:Inter;font-size:12px;outline:none">
+      <option value="all">All Airlines</option>
+    </select>
+  </div>
+  <div class="range-wrap">
+    <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Aircraft Type</div>
+    <select id="actype-filter" onchange="applyFilters()" style="width:100%;padding:8px;background:rgba(0,0,0,.3);color:#fff;border:1px solid var(--bd);border-radius:8px;font-family:Inter;font-size:12px;outline:none">
+      <option value="all">All Aircraft</option>
+    </select>
+  </div>
+  <div style="padding:12px 14px">
+    <button onclick="resetFilters()" style="width:100%;padding:10px;background:rgba(59,184,232,.08);border:1px solid rgba(59,184,232,.12);border-radius:10px;color:var(--a);font-family:Inter;font-size:12px;font-weight:600;cursor:pointer">Reset All Filters</button>
+  </div>
+  <div style="padding:0 14px 14px;font-size:10px;color:var(--t3);text-align:center" id="filter-count">Showing 1000 of 1000 flights</div>
 </div>
 <div id="search"><div style="padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)"><button onclick="closeSearch()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px">✕</button><input id="si" type="text" placeholder="Search flights, airports, airlines…" autofocus style="flex:1;background:rgba(24,36,64,1);border:1px solid var(--bd);border-radius:12px;padding:12px 16px;outline:none;color:#fff;font-family:Inter;font-size:15px"></div><div id="sr" style="flex:1;overflow-y:auto"></div></div>
 <div id="panel"><div class="handle"></div><div style="padding:8px 16px 12px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center"><div id="pt" style="font-size:16px;font-weight:600"></div><button onclick="cp()" style="background:rgba(255,255,255,.06);border:none;color:var(--t2);cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button></div><div id="pb" style="flex:1;overflow-y:auto;overscroll-behavior:contain"></div></div>
@@ -277,6 +341,98 @@ window.listenATC=function(mount,icao){
   }
 };
 
+// === LAYERS & FILTERS ===
+let currentBase='dark';
+const baseLayers={
+  dark:L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd'}),
+  satellite:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{}),
+  terrain:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{})
+};
+let cloudLayer=null;
+let dayNightLayer=null;
+let apVisible=true;
+
+function toggleLayers(){document.getElementById('layers-panel').classList.toggle('open');}
+
+function setBaseMap(type){
+  Object.values(baseLayers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});
+  baseLayers[type].addTo(map);
+  currentBase=type;
+  ['dark','sat','ter'].forEach(t=>{const el=document.getElementById('tg-'+t);if(el)el.classList.remove('on');});
+  const id=type==='dark'?'tg-dark':type==='satellite'?'tg-sat':'tg-ter';
+  document.getElementById(id)?.classList.add('on');
+}
+
+function toggleOverlay(type){
+  if(type==='radar'){
+    const tg=document.getElementById('tg-radar');
+    if(wxLayer&&map.hasLayer(wxLayer)){map.removeLayer(wxLayer);tg?.classList.remove('on');}
+    else if(wxLayer){wxLayer.addTo(map);tg?.classList.add('on');}
+  }
+  if(type==='clouds'){
+    const tg=document.getElementById('tg-clouds');
+    if(cloudLayer&&map.hasLayer(cloudLayer)){map.removeLayer(cloudLayer);tg?.classList.remove('on');}
+    else{
+      if(!cloudLayer){fetch('https://api.rainviewer.com/public/weather-maps.json').then(r=>r.json()).then(d=>{if(d.satellite&&d.satellite.infrared&&d.satellite.infrared.length){const f=d.satellite.infrared[d.satellite.infrared.length-1];cloudLayer=L.tileLayer(d.host+f.path+'/256/{z}/{x}/{y}/0/0_0.png',{opacity:0.35,zIndex:4}).addTo(map);tg?.classList.add('on');}}).catch(()=>{});}
+      else{cloudLayer.addTo(map);tg?.classList.add('on');}
+    }
+  }
+  if(type==='airports'){
+    apVisible=!apVisible;
+    const tg=document.getElementById('tg-ap');
+    AP.forEach(a=>{/* airports are individual markers, toggle would require storing refs */});
+    tg?.classList.toggle('on');
+  }
+  if(type==='daynight'){
+    const tg=document.getElementById('tg-dn');
+    if(dayNightLayer&&map.hasLayer(dayNightLayer)){map.removeLayer(dayNightLayer);tg?.classList.remove('on');}
+    else{
+      // Simple day/night approximation using a polygon
+      const now=new Date();const h=now.getUTCHours()+now.getUTCMinutes()/60;
+      const sunLng=-(h/24)*360+180;
+      const pts=[];for(let lat=-80;lat<=80;lat+=2){pts.push([lat,sunLng-90]);};pts.push([80,sunLng+90]);for(let lat=80;lat>=-80;lat-=2){pts.push([lat,sunLng+90]);}
+      dayNightLayer=L.polygon(pts,{color:'none',fillColor:'#000',fillOpacity:0.2,interactive:false}).addTo(map);
+      tg?.classList.add('on');
+    }
+  }
+}
+
+// Flight filters
+let filterAltMin=0,filterAltMax=65000,filterSpdMin=0,filterSpdMax=800,filterAirline='all',filterAcType='all';
+
+function applyFilters(){
+  filterAltMin=+document.getElementById('alt-min').value;
+  filterAltMax=+document.getElementById('alt-max').value;
+  filterSpdMin=+document.getElementById('spd-min').value;
+  filterSpdMax=+document.getElementById('spd-max').value;
+  filterAirline=document.getElementById('airline-filter').value;
+  filterAcType=document.getElementById('actype-filter').value;
+  document.getElementById('alt-val').textContent=`${filterAltMin.toLocaleString()} — ${filterAltMax.toLocaleString()} ft`;
+  document.getElementById('spd-val').textContent=`${filterSpdMin} — ${filterSpdMax} kts`;
+  let shown=0;
+  fl.forEach(f=>{
+    const visible=f.alt>=filterAltMin&&f.alt<=filterAltMax&&f.spd>=filterSpdMin&&f.spd<=filterSpdMax&&(filterAirline==='all'||f.al.l===filterAirline)&&(filterAcType==='all'||f.ac.c===filterAcType);
+    if(acM[f.id]){if(visible){if(!map.hasLayer(acM[f.id]))acM[f.id].addTo(map);shown++;}else{if(map.hasLayer(acM[f.id]))map.removeLayer(acM[f.id]);}}
+  });
+  document.getElementById('filter-count').textContent=`Showing ${shown} of ${fl.length} flights`;
+}
+
+function resetFilters(){
+  document.getElementById('alt-min').value=0;document.getElementById('alt-max').value=65000;
+  document.getElementById('spd-min').value=0;document.getElementById('spd-max').value=800;
+  document.getElementById('airline-filter').value='all';document.getElementById('actype-filter').value='all';
+  applyFilters();
+}
+
+// Populate filter dropdowns
+function initFilters(){
+  const alSel=document.getElementById('airline-filter');
+  const seen={};AL.forEach(a=>{if(!seen[a.l]){seen[a.l]=1;const o=document.createElement('option');o.value=a.l;o.textContent=a.n;alSel.appendChild(o);}});
+  const acSel=document.getElementById('actype-filter');
+  const seenAc={};fl.forEach(f=>{if(!seenAc[f.ac.c]){seenAc[f.ac.c]=1;const o=document.createElement('option');o.value=f.ac.c;o.textContent=f.ac.c+' — '+f.ac.n;acSel.appendChild(o);}});
+}
+
+initFilters();
 render();
 </script>
 </body>
