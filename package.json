@@ -1,12 +1,29 @@
 {
   "name": "skyway",
-  "version": "1.0.0",
-  "description": "SkyWay — Premium global aviation intelligence platform. Live flight tracking, 3D globe, ATC audio & transcripts.",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "npx serve .",
-    "dev": "npx serve . --cors"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "keywords": ["aviation", "flight-tracking", "3d-globe", "atc"],
-  "license": "MIT",
-  "private": true
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "^15.3.0",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/leaflet": "^1.9.14",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.3.0",
+    "@eslint/eslintrc": "^3.0.0"
+  }
 }
